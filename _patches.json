@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Bass Lead",
+    "from_note": 1,
+    "to_note": 2,
+    "note_gap": 0.1,
+    "note_duration": 1.2,
+    "midi_channel": 0,
+    "program_change": 42,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 100
+  },
+  {
+    "name": "Warm Pad",
+    "from_note": 1,
+    "to_note": 2,
+    "note_gap": 0.2,
+    "note_duration": 1.5,
+    "midi_channel": 1,
+    "program_change": 15,
+    "bank_msb": 1,
+    "bank_lsb": 32,
+    "velocity": 110
+  }
+]

@@ -1,1 +1,1 @@
-# robosampla
+pip install -r requirements.txt
