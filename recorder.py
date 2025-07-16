@@ -11,6 +11,8 @@ from midi_utils import (
 )
 from audio_utils import get_device_channels, save_audio
 from patch_utils import safe_filename, create_patch_folder
+from audio_processor import process_recorded_sample, process_patch_folder
+from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB
 import sounddevice as sd
 
 
@@ -64,14 +66,40 @@ def play_patch(outport, patch, record_audio_flag=False, sample_rate=44100, audio
             
             # Save the audio file
             safe_note_name = safe_filename(note_name)
-            filename = f"{safe_note_name}_{note}.wav"
+            filename = f"{note}_{safe_note_name}.wav"
             filepath = os.path.join(patch_folder, filename)
             
             # Save the recording
             shape = save_audio(recording, filepath, sample_rate)
             print(f"  Saved: {filepath} ({shape})")
+            
+            # Create unprocessed subfolder and save original
+            unprocessed_folder = os.path.join(patch_folder, "unprocessed")
+            os.makedirs(unprocessed_folder, exist_ok=True)
+            unprocessed_filepath = os.path.join(unprocessed_folder, filename)
+            
+            # Copy original file to unprocessed folder
+            import shutil
+            shutil.copy2(filepath, unprocessed_filepath)
+            print(f"  Original saved: {unprocessed_filepath}")
+            
+            # Process the recorded sample (remove silence, add fades)
+            print(f"  Processing: {filename}")
+            if process_recorded_sample(filepath, sample_rate, 
+                                     SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS):
+                print(f"  ✓ Processed successfully")
+            else:
+                print(f"  ✗ Processing failed")
         
         time.sleep(patch['note_gap'])
+    
+    # After all notes in the patch are recorded, normalize the entire patch
+    if record_audio_flag and patch_folder:
+        print(f"\nPost-processing patch: {patch['name']}")
+        if process_patch_folder(patch_folder, sample_rate, TARGET_PEAK_DB, FADE_IN_MS, FADE_OUT_MS):
+            print(f"✓ Patch normalization completed")
+        else:
+            print(f"✗ Patch normalization failed")
 
 
 def record_all_patches(patches, midi_port_name, record_audio=True, sample_rate=44100, audio_device=None):

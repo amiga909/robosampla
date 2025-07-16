@@ -1,2 +1,6 @@
 mido
 python-rtmidi
+sounddevice
+scipy
+numpy
+pydub

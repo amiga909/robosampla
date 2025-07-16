@@ -5,9 +5,10 @@ Usage: python program_change.py [program_number] [channel]
 """
 import sys
 import argparse
+import time
 import mido
 from config import MIDI_PORT_NAME
-from midi_utils import send_program_change, list_midi_ports
+from midi_utils import send_program_change, send_note_on, send_note_off, list_midi_ports, midi_note_to_name
 
 
 def send_program_interactive():
@@ -90,28 +91,73 @@ def send_program_once(program, channel=0):
         return False
 
 
+def send_note_sequence():
+    """Send note sequence: Hardcoded dictionary of specific notes."""
+    try:
+        with mido.open_output(MIDI_PORT_NAME) as outport:
+            print(f"Sending note sequence on MIDI port: {MIDI_PORT_NAME}")
+          
+            # Hardcoded note sequence with note numbers and names
+            notes = {
+                0: "C-1",
+                6: "F#-1", 
+                12: "C0",
+                18: "F#0",
+                24: "C1",
+                30: "F#1",
+                36: "C2",
+                96: "C7",
+                103: "G7",
+                108: "C8",
+                120: "C9",
+                127: "G9"
+            }
+            
+            print(f"Playing {len(notes)} notes: {list(notes.keys())}")
+            
+            for note_num, note_name in notes.items():
+                print(f"Playing note {note_num} ({note_name})")
+                
+                # Send note on
+                send_note_on(outport, note_num, 100, 0)  # velocity 100, channel 0
+                time.sleep(2.0)   
+
+                # Send note off
+                send_note_off(outport, note_num, 0)
+                time.sleep(0.5)  # 0.5 second interval between notes
+            
+            print("Note sequence completed!")
+            return True
+            
+    except OSError as e:
+        print(f"Error opening MIDI port '{MIDI_PORT_NAME}': {e}")
+        print("\nAvailable MIDI ports:")
+        list_midi_ports()
+        return False
+    except KeyboardInterrupt:
+        print("\nNote sequence interrupted by user")
+        return False
+
+
 def main():
     """Main function with command line argument parsing."""
     parser = argparse.ArgumentParser(
-        description="Send MIDI program changes",
+        description="Send MIDI program change and play note sequence",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python program_change.py                    # Interactive mode
-  python program_change.py 42                # Send program 42 on channel 0
-  python program_change.py 42 1              # Send program 42 on channel 1
+  python program_change.py 42                # Send program 42 on channel 0, then play notes
+  python program_change.py 42 1              # Send program 42 on channel 1, then play notes
   python program_change.py --list            # List MIDI ports
         """
     )
     
-    parser.add_argument('program', nargs='?', type=int, 
-                       help='Program number (0-127)')
+    parser.add_argument('program', type=int, 
+                       help='Program number (0-127) - required')
     parser.add_argument('channel', nargs='?', type=int, default=0,
                        help='MIDI channel (0-15, default: 0)')
     parser.add_argument('--list', action='store_true',
                        help='List available MIDI ports and exit')
-    parser.add_argument('--interactive', '-i', action='store_true',
-                       help='Force interactive mode')
     
     args = parser.parse_args()
     
@@ -121,23 +167,24 @@ Examples:
         return
     
     # Validate arguments
-    if args.program is not None:
-        if not 0 <= args.program <= 127:
-            print("Error: Program number must be between 0-127")
-            sys.exit(1)
-        if not 0 <= args.channel <= 15:
-            print("Error: Channel must be between 0-15")
-            sys.exit(1)
+    if not 0 <= args.program <= 127:
+        print("Error: Program number must be between 0-127")
+        sys.exit(1)
+    if not 0 <= args.channel <= 15:
+        print("Error: Channel must be between 0-15")
+        sys.exit(1)
     
-    # Determine mode
-    if args.program is not None and not args.interactive:
-        # Single program change mode
-        success = send_program_once(args.program, args.channel)
-        sys.exit(0 if success else 1)
-    else:
-        # Interactive mode
-        success = send_program_interactive()
-        sys.exit(0 if success else 1)
+    # Send program change first
+    print(f"Sending Program Change {args.program} on channel {args.channel}...")
+    success = send_program_once(args.program, args.channel)
+    if not success:
+        sys.exit(1)
+    
+    # Always run note sequence after program change
+    print("\nStarting note sequence...")
+    time.sleep(1.0)  # Short pause between program change and notes
+    success = send_note_sequence()
+    sys.exit(0 if success else 1)
 
 
 if __name__ == '__main__':

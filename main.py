@@ -4,7 +4,10 @@ RoboSampla - Automated synthesizer sampler
 Main application entry point.
 """
 import sys
-from config import MIDI_PORT_NAME, SAMPLE_RATE, AUDIO_DEVICE, PATCHES_FILE
+from config import (
+    MIDI_PORT_NAME, SAMPLE_RATE, AUDIO_DEVICE, PATCHES_FILE,
+    SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB
+)
 from patch_utils import load_patches
 from midi_utils import list_midi_ports
 from audio_utils import list_audio_devices

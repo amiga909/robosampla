@@ -4,6 +4,7 @@ Patch management utilities for loading and handling synthesizer patches.
 import json
 import os
 import re
+from config import OUTPUT_DIR
 
 
 def load_patches(filename='patches.json'):
@@ -37,5 +38,6 @@ def safe_filename(name):
 def create_patch_folder(patch_name):
     """Create a folder for a patch if it doesn't exist."""
     folder_name = safe_filename(patch_name)
-    os.makedirs(folder_name, exist_ok=True)
-    return folder_name
+    full_path = os.path.join(OUTPUT_DIR, folder_name)
+    os.makedirs(full_path, exist_ok=True)
+    return full_path
