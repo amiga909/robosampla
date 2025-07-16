@@ -6,8 +6,13 @@ Usage: python program_change.py [program_number] [channel]
 import sys
 import argparse
 import time
+import os
 import mido
-from config import MIDI_PORT_NAME
+
+# Add parent directory to path to import config
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config_loader import MIDI_PORT_NAME, run_setup_if_needed
 from midi_utils import send_program_change, send_note_on, send_note_off, list_midi_ports, midi_note_to_name
 
 
@@ -100,6 +105,7 @@ def send_note_sequence():
             # Hardcoded note sequence with note numbers and names
             notes = {
                 0: "C-1",
+                3: "D#-1",
                 6: "F#-1", 
                 12: "C0",
                 18: "F#0",
@@ -109,6 +115,8 @@ def send_note_sequence():
                 96: "C7",
                 103: "G7",
                 108: "C8",
+                111: "D8",
+                116: "E8",
                 120: "C9",
                 127: "G9"
             }
@@ -141,6 +149,11 @@ def send_note_sequence():
 
 def main():
     """Main function with command line argument parsing."""
+    # Test configuration and run setup if needed
+    if not run_setup_if_needed():
+        print("Configuration setup failed. Exiting.")
+        sys.exit(1)
+    
     parser = argparse.ArgumentParser(
         description="Send MIDI program change and play note sequence",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -182,7 +195,7 @@ Examples:
     
     # Always run note sequence after program change
     print("\nStarting note sequence...")
-    time.sleep(1.0)  # Short pause between program change and notes
+    time.sleep(3.0)  # Pause between program change and notes
     success = send_note_sequence()
     sys.exit(0 if success else 1)
 

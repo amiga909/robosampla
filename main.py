@@ -4,9 +4,13 @@ RoboSampla - Automated synthesizer sampler
 Main application entry point.
 """
 import sys
-from config import (
+import os
+
+# Test and load configuration
+from config_loader import (
     MIDI_PORT_NAME, SAMPLE_RATE, AUDIO_DEVICE, PATCHES_FILE,
-    SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB
+    SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB,
+    run_setup_if_needed
 )
 from patch_utils import load_patches
 from midi_utils import list_midi_ports
@@ -17,6 +21,11 @@ from recorder import record_all_patches
 def main():
     """Main application function."""
     print("=== RoboSampla - Automated Synthesizer Sampler ===\n")
+    
+    # Test configuration and run setup if needed
+    if not run_setup_if_needed():
+        print("Configuration setup failed. Exiting.")
+        sys.exit(1)
    
     # Show available devices
     list_midi_ports()
@@ -25,14 +34,10 @@ def main():
     # Load patches
     patches = load_patches(PATCHES_FILE)
     
-    # Ask user if they want to record audio (or set to True for auto-recording)
-    record_audio_flag = True  # input("Do you want to record audio? (y/n): ").lower().startswith('y')
-    
-    # Start recording
+    # Start recording (audio recording is always enabled)
     success = record_all_patches(
         patches=patches,
         midi_port_name=MIDI_PORT_NAME,
-        record_audio=record_audio_flag,
         sample_rate=SAMPLE_RATE,
         audio_device=AUDIO_DEVICE
     )

@@ -161,6 +161,7 @@ def analyze_patch_levels(patch_folder: str) -> Dict[str, float]:
     """
     levels = {}
     wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
+    wav_files.sort()  # Sort by filename for consistent processing order
     
     for wav_file in wav_files:
         try:
@@ -221,6 +222,7 @@ def normalize_patch_relative(patch_folder: str, target_peak_db: float = -6.0,
     
     # Apply normalization to all files
     wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
+    wav_files.sort()  # Sort by filename for consistent processing order
     
     for wav_file in wav_files:
         try:
@@ -312,6 +314,7 @@ def process_patch_folder(patch_folder: str, sample_rate: int,
     
     # Get all WAV files
     wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
+    wav_files.sort()  # Sort by filename for consistent processing order
     
     if not wav_files:
         print("No WAV files found in patch folder")

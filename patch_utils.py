@@ -4,14 +4,23 @@ Patch management utilities for loading and handling synthesizer patches.
 import json
 import os
 import re
-from config import OUTPUT_DIR
+from config import OUTPUT_DIR, DEFAULT_MIDI_CHANNEL, DEFAULT_BANK_MSB, DEFAULT_BANK_LSB, DEFAULT_VELOCITY
 
 
 def load_patches(filename='patches.json'):
-    """Load patches from a JSON file."""
+    """Load patches from a JSON file and apply default values for missing parameters."""
     try:
         with open(filename, 'r') as f:
-            return json.load(f)
+            patches = json.load(f)
+        
+        # Apply default values for missing MIDI parameters
+        for patch in patches:
+            patch.setdefault('midi_channel', DEFAULT_MIDI_CHANNEL)
+            patch.setdefault('bank_msb', DEFAULT_BANK_MSB)
+            patch.setdefault('bank_lsb', DEFAULT_BANK_LSB)
+            patch.setdefault('velocity', DEFAULT_VELOCITY)
+        
+        return patches
     except FileNotFoundError:
         print(f"{filename} not found. Using default patch.")
         return [{
@@ -21,9 +30,10 @@ def load_patches(filename='patches.json'):
             "note_gap": 0.1,
             "note_duration": 1.0,
             "program_change": 0,
-            "bank_msb": 0,
-            "bank_lsb": 0,
-            "velocity": 100
+            "midi_channel": DEFAULT_MIDI_CHANNEL,
+            "bank_msb": DEFAULT_BANK_MSB,
+            "bank_lsb": DEFAULT_BANK_LSB,
+            "velocity": DEFAULT_VELOCITY
         }]
 
 

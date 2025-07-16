@@ -2,15 +2,17 @@
 Configuration settings for the robosampla application.
 """
 
-# MIDI settings
-MIDI_PORT_NAME = 'iConnectAudio4+ DIN'
+# Default MIDI parameters (can be overridden in patch JSON files)
+DEFAULT_MIDI_CHANNEL = 0
+DEFAULT_BANK_MSB = 0
+DEFAULT_BANK_LSB = 0
+DEFAULT_VELOCITY = 127
 
 # Audio recording settings
 SAMPLE_RATE = 44100  # Sample rate in Hz
-AUDIO_DEVICE = 0     # Audio device index (use None for default)
 
 # Audio processing settings
-SILENCE_THRESHOLD_DB = -50.0  # Threshold in dB for silence detection, min. DB audible sound must have
+SILENCE_THRESHOLD_DB = -40.0  # Threshold in dB for silence detection, min. DB audible sound must have
 FADE_IN_MS = 20.0             # Fade in duration in milliseconds
 FADE_OUT_MS = 20.0            # Fade out duration in milliseconds
 TARGET_PEAK_DB = -1.0        # Target peak level in dB for patch normalization

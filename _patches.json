@@ -1,63 +1,53 @@
 [
   {
+    "skip": true,
     "name": "Jump !",
     "program_change": 0,
     "from_note": 24,
     "to_note": 120,
-    "note_gap": 3,
-    "note_duration": 20,
-    "midi_channel": 0,
-    "bank_msb": 0,
-    "bank_lsb": 0,
-    "velocity": 127
+    "note_gap": 5,
+    "note_duration": 20
   },
-
   {
+    "skip": true,
     "name": "Light Piano",
     "program_change": 1,
     "from_note": 12,
     "to_note": 120,
     "note_gap": 2,
-    "note_duration": 8,
-    "midi_channel": 0,
-    "bank_msb": 0,
-    "bank_lsb": 0,
-    "velocity": 127
+    "note_duration": 8
   },
   {
+    "skip": true,
     "name": "VangelisA",
     "program_change": 2,
-    "from_note": 0,
-    "to_note": 120,
-    "note_gap": 3,
-    "note_duration": 20,
-    "midi_channel": 0,
-    "bank_msb": 0,
-    "bank_lsb": 0,
-    "velocity": 127
+    "from_note": 24,
+    "to_note": 127,
+    "note_gap": 5,
+    "note_duration": 20
   },
   {
     "name": "FilterAna",
     "program_change": 3,
     "from_note": 24,
     "to_note": 120,
-    "note_gap": 3,
-    "note_duration": 20,
-    "midi_channel": 0,
-    "bank_msb": 0,
-    "bank_lsb": 0,
-    "velocity": 127
+    "note_gap": 5,
+    "note_duration": 20
   },
   {
     "name": "Old M.Tp",
     "program_change": 4,
     "from_note": 36,
     "to_note": 120,
-    "note_gap": 3,
-    "note_duration": 20,
-    "midi_channel": 0,
-    "bank_msb": 0,
-    "bank_lsb": 0,
-    "velocity": 127
+    "note_gap": 5,
+    "note_duration": 20
+  },
+  {
+    "name": "Voice Ah",
+    "program_change": 5,
+    "from_note": 12,
+    "to_note": 127,
+    "note_gap": 5,
+    "note_duration": 20
   }
 ]
