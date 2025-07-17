@@ -6,7 +6,8 @@
     "from_note": 24,
     "to_note": 120,
     "note_gap": 5,
-    "note_duration": 20
+    "note_duration": 20,
+    "mono": false
   },
   {
     "skip": true,
@@ -15,7 +16,8 @@
     "from_note": 12,
     "to_note": 120,
     "note_gap": 2,
-    "note_duration": 8
+    "note_duration": 8,
+    "mono": false
   },
   {
     "skip": true,
@@ -24,30 +26,77 @@
     "from_note": 24,
     "to_note": 127,
     "note_gap": 5,
-    "note_duration": 20
+    "note_duration": 20,
+    "mono": false
   },
   {
+    "skip": true,
     "name": "FilterAna",
     "program_change": 3,
     "from_note": 24,
     "to_note": 120,
     "note_gap": 5,
-    "note_duration": 20
+    "note_duration": 20,
+    "mono": false
   },
   {
+    "skip": true,
     "name": "Old M.Tp",
     "program_change": 4,
     "from_note": 36,
     "to_note": 120,
     "note_gap": 5,
-    "note_duration": 20
+    "note_duration": 20,
+    "mono": false
   },
   {
-    "name": "Voice Ah",
-    "program_change": 5,
+    "skip": true,
+    "name": "Dist.H_Mute",
+    "program_change": 6,
+    "from_note": 24,
+    "to_note": 127,
+    "note_gap": 1,
+    "note_duration": 1,
+    "mono": true
+  },
+  {
+    "skip": true,
+    "name": "DownUpEFX",
+    "program_change": 8,
     "from_note": 12,
+    "to_note": 109,
+    "note_gap": 5,
+    "note_duration": 15,
+    "mono": false
+  },
+  {
+    "skip": true,
+    "name": "SuitcaseP",
+    "program_change": 9,
+    "from_note": 12,
+    "to_note": 109,
+    "note_gap": 5,
+    "note_duration": 4,
+    "mono": false
+  },
+  {
+    "skip": false,
+    "name": "Moko-okom",
+    "program_change": 24,
+    "from_note": 24,
     "to_note": 127,
     "note_gap": 5,
-    "note_duration": 20
+    "note_duration": 10,
+    "mono": false
+  },
+  {
+    "skip": false,
+    "name": "RecSax",
+    "program_change": 26,
+    "from_note": 24,
+    "to_note": 127,
+    "note_gap": 5,
+    "note_duration": 18,
+    "mono": false
   }
 ]

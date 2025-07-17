@@ -2,15 +2,8 @@
   {
     "name": "House!",
     "program_change": 0,
-    "notes": {
-      "36": "Kick",
-      "38": "Snare",
-      "42": "HiHat_Closed",
-      "46": "HiHat_Open",
-      "49": "Crash",
-      "51": "Ride"
-    },
+    "type": "airbase",
     "note_gap": 1,
-    "note_duration": 1
+    "note_duration": 3
   }
 ]

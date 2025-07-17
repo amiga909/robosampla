@@ -48,7 +48,7 @@ def get_device_channels(device_id):
     """Get the number of input channels for a specific audio device."""
     try:
         device_info = sd.query_devices(device_id)
-        max_input_channels = device_info.get('max_inputs', 1)
+        max_input_channels = device_info.get('max_input_channels', 1)
         return min(2, max_input_channels) if max_input_channels > 0 else 1
     except:
         return 1  # Fallback to mono

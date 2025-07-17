@@ -6,6 +6,33 @@ import os
 import re
 from config import OUTPUT_DIR, DEFAULT_MIDI_CHANNEL, DEFAULT_BANK_MSB, DEFAULT_BANK_LSB, DEFAULT_VELOCITY
 
+DRUM_MAPPING_FILE = '_drum_mapping.json'
+
+
+def load_drum_mappings(filename=DRUM_MAPPING_FILE):
+    """Load drum mappings from JSON file."""
+    try:
+        with open(filename, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Warning: {filename} not found. Drum mappings will not be available.")
+        return {}
+    except json.JSONDecodeError as e:
+        print(f"Error parsing {filename}: {e}")
+        return {}
+
+
+def apply_drum_mapping(patch, drum_mappings):
+    """Apply drum mapping to a patch if it has a type field."""
+    if 'type' in patch and patch['type'] in drum_mappings:
+        mapping = drum_mappings[patch['type']]
+        if 'notes' in mapping:
+            patch['notes'] = mapping['notes']
+            print(f"Applied {patch['type']} drum mapping: {len(patch['notes'])} notes")
+        else:
+            print(f"Warning: No notes found in {patch['type']} mapping")
+    return patch
+
 
 def load_patches(filename='patches.json'):
     """Load patches from a JSON file and apply default values for missing parameters."""
@@ -13,12 +40,22 @@ def load_patches(filename='patches.json'):
         with open(filename, 'r') as f:
             patches = json.load(f)
         
-        # Apply default values for missing MIDI parameters
+        # Load drum mappings
+        drum_mappings = load_drum_mappings()
+        
+        # Apply default values for missing MIDI parameters and drum mappings
         for patch in patches:
+            # Apply drum mapping if patch has a type
+            patch = apply_drum_mapping(patch, drum_mappings)
+            
+            # Apply default MIDI parameters
             patch.setdefault('midi_channel', DEFAULT_MIDI_CHANNEL)
             patch.setdefault('bank_msb', DEFAULT_BANK_MSB)
             patch.setdefault('bank_lsb', DEFAULT_BANK_LSB)
             patch.setdefault('velocity', DEFAULT_VELOCITY)
+            
+            # Apply default mono setting (default is stereo recording)
+            patch.setdefault('mono', False)
         
         return patches
     except FileNotFoundError:
@@ -33,7 +70,8 @@ def load_patches(filename='patches.json'):
             "midi_channel": DEFAULT_MIDI_CHANNEL,
             "bank_msb": DEFAULT_BANK_MSB,
             "bank_lsb": DEFAULT_BANK_LSB,
-            "velocity": DEFAULT_VELOCITY
+            "velocity": DEFAULT_VELOCITY,
+            "mono": False
         }]
 
 

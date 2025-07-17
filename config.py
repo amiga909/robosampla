@@ -12,13 +12,16 @@ DEFAULT_VELOCITY = 127
 SAMPLE_RATE = 44100  # Sample rate in Hz
 
 # Audio processing settings
-SILENCE_THRESHOLD_DB = -40.0  # Threshold in dB for silence detection, min. DB audible sound must have
+SILENCE_THRESHOLD_DB = -55.0  # Threshold in dB for silence detection, all audio below this value is treated as silence
 FADE_IN_MS = 20.0             # Fade in duration in milliseconds
 FADE_OUT_MS = 20.0            # Fade out duration in milliseconds
-TARGET_PEAK_DB = -1.0        # Target peak level in dB for patch normalization
+TARGET_PEAK_DB = -1.0        # Target peak level in dB for patch normalization (hybrid approach)
 
 # Default patch filename
 PATCHES_FILE = '_patches.json'
 
 # Output directory for recorded samples
 OUTPUT_DIR = '_output'
+
+# Unprocessed samples subfolder name
+UNPROCESSED_FOLDER = 'unprocessed'

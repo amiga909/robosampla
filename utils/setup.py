@@ -28,7 +28,9 @@ def list_audio_devices():
     for i, device in enumerate(devices):
         if device['max_input_channels'] > 0:
             input_devices.append((i, device))
-            print(f"{i:2d}: {device['name']} (inputs: {device['max_input_channels']}, rate: {device['default_samplerate']:.0f})")
+            channels = device['max_input_channels']
+            stereo_info = "Stereo" if channels >= 2 else "Mono only"
+            print(f"{i:2d}: {device['name']} ({channels} ch, {stereo_info}, {device['default_samplerate']:.0f}Hz)")
     
     return input_devices
 
@@ -45,15 +47,36 @@ def list_midi_ports():
 
 
 def test_audio_device(device_id, sample_rate=44100):
-    """Test if an audio device works for recording."""
+    """Test if an audio device works for recording and check stereo capability."""
     try:
         print(f"Testing audio device {device_id}...")
-        # Try a very short recording
+        
+        # Test mono recording first
         recording = sd.rec(int(0.1 * sample_rate), samplerate=sample_rate, 
                           channels=1, dtype='float64', device=device_id)
         sd.wait()
-        print("✓ Audio device test successful")
+        print("✓ Mono recording test successful")
+        
+        # Test stereo recording capability
+        try:
+            recording = sd.rec(int(0.1 * sample_rate), samplerate=sample_rate, 
+                              channels=2, dtype='float64', device=device_id)
+            sd.wait()
+            print("✓ Stereo recording test successful")
+            stereo_capable = True
+        except Exception as e:
+            print(f"⚠️  Stereo recording not available: {e}")
+            print("   Device will be limited to mono recording")
+            stereo_capable = False
+        
+        # Get device info to show channel details
+        if device_id is not None:
+            device_info = sd.query_devices(device_id)
+            max_channels = device_info.get('max_input_channels', 1)
+            print(f"   Device supports up to {max_channels} input channel(s)")
+        
         return True
+        
     except Exception as e:
         print(f"✗ Audio device test failed: {e}")
         return False
@@ -202,6 +225,21 @@ def run_setup():
         print(f"Audio Device: {'Default' if config['audio_device'] is None else config['audio_device']}")
         print(f"MIDI Port: {config['midi_port_name']}")
         print(f"Sample Rate: {config['sample_rate']}")
+        
+        # Show stereo capability info
+        if config['audio_device'] is not None:
+            try:
+                device_info = sd.query_devices(config['audio_device'])
+                max_channels = device_info.get('max_input_channels', 1)
+                if max_channels >= 2:
+                    print(f"Recording: Stereo and mono supported")
+                else:
+                    print(f"Recording: Mono only (device limitation)")
+            except:
+                print(f"Recording: Capability unknown")
+        else:
+            print(f"Recording: Default device (stereo capability depends on system default)")
+        
         print("\nYou can run this setup again anytime to change settings.")
         return True
     else:

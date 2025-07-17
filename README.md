@@ -9,11 +9,14 @@ An automated tool for sampling synthesizers by playing MIDI notes and recording 
 
 # Commands
 
+- caffeinate -di python main.py // use caffeinate on mac to keep recording going
+
 - python utils/setup.py
 - python main.py
 - python utils/program_change.py 69
+- python utils/test_patches.y
 
-- caffeinate python main.py
+- caffeinate -di python main.py
 
 ## File Structure
 

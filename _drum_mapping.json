@@ -1,0 +1,17 @@
+{
+  "airbase": {
+    "description": "Airbase drum machine mapping",
+    "notes": {
+      "36": "Kick",
+      "40": "Snare",
+      "41": "Lo_Tom",
+      "43": "Hi_Tom",
+      "42": "Closed_HiHat",
+      "46": "Open_HiHat",
+      "39": "Clap",
+      "37": "Rim_Shot",
+      "49": "Crash",
+      "52": "Ride"
+    }
+  }
+}

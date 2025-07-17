@@ -1,6 +1,7 @@
 mido
 python-rtmidi
 sounddevice
+soundfile
 scipy
 numpy
 pydub
