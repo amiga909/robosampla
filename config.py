@@ -22,6 +22,3 @@ PATCHES_FILE = '_patches.json'
 
 # Output directory for recorded samples
 OUTPUT_DIR = '_output'
-
-# Unprocessed samples subfolder name
-UNPROCESSED_FOLDER = 'unprocessed'

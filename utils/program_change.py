@@ -127,12 +127,12 @@ def send_note_sequence():
                 print(f"Playing note {note_num} ({note_name})")
                 
                 # Send note on
-                send_note_on(outport, note_num, 100, 0)  # velocity 100, channel 0
-                time.sleep(2.0)   
+                send_note_on(outport, note_num, 127, 0)  
+                time.sleep(1.5)   
 
                 # Send note off
                 send_note_off(outport, note_num, 0)
-                time.sleep(0.5)  # 0.5 second interval between notes
+                time.sleep(0.3)   
             
             print("Note sequence completed!")
             return True

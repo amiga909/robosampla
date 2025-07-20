@@ -13,34 +13,39 @@ import shutil
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audio_processor import process_patch_folder
-from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB, OUTPUT_DIR, UNPROCESSED_FOLDER, SAMPLE_RATE
+from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB, OUTPUT_DIR, SAMPLE_RATE
 
 
 def process_single_patch(patch_folder, sample_rate, target_peak_db, fade_in_ms, fade_out_ms):
-    """Process a single patch folder by copying from unprocessed to root and processing."""
-    unprocessed_folder = os.path.join(patch_folder, UNPROCESSED_FOLDER)
+    """Process a single patch folder by copying to a new 'processed_PATCHNAME' folder and processing."""
+    patch_name = os.path.basename(patch_folder)
     
-    if not os.path.exists(unprocessed_folder):
-        print(f"  Warning: No '{UNPROCESSED_FOLDER}' subfolder found in {os.path.basename(patch_folder)}")
+    # Get WAV files from root patch folder
+    wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
+    if not wav_files:
+        print(f"  Warning: No WAV files found in {patch_name}")
         return False
     
-    # Get unprocessed WAV files
-    unprocessed_files = glob.glob(os.path.join(unprocessed_folder, "*.wav"))
-    if not unprocessed_files:
-        print(f"  Warning: No WAV files found in {os.path.join(os.path.basename(patch_folder), UNPROCESSED_FOLDER)}")
-        return False
+    print(f"  Found {len(wav_files)} files to process")
     
-    print(f"  Found {len(unprocessed_files)} unprocessed files")
+    # Create processed folder in the same parent directory as the original
+    parent_dir = os.path.dirname(patch_folder)
+    processed_folder_name = f"_processed_{patch_name}"
+    processed_folder = os.path.join(parent_dir, processed_folder_name)
     
-    # Copy unprocessed files to patch root (overwrite processed samples)
-    for unprocessed_file in unprocessed_files:
-        filename = os.path.basename(unprocessed_file)
-        dest_path = os.path.join(patch_folder, filename)
-        shutil.copy2(unprocessed_file, dest_path)
+    # Create the processed folder
+    os.makedirs(processed_folder, exist_ok=True)
+    print(f"  Created processed folder: {processed_folder_name}")
     
-    # Process the patch folder
+    # Copy all WAV files to the processed folder
+    for wav_file in wav_files:
+        filename = os.path.basename(wav_file)
+        dest_path = os.path.join(processed_folder, filename)
+        shutil.copy2(wav_file, dest_path)
+    
+    # Process the processed folder (leaving original untouched)
     success, processing_errors = process_patch_folder(
-        patch_folder=patch_folder,
+        patch_folder=processed_folder,
         sample_rate=sample_rate,
         target_peak_db=target_peak_db,
         fade_in_ms=fade_in_ms,
@@ -58,15 +63,20 @@ def process_single_patch(patch_folder, sample_rate, target_peak_db, fade_in_ms, 
 
 
 def find_patch_folders(root_folder):
-    """Find all patch folders that contain an 'unprocessed' subfolder."""
+    """Find all patch folders that contain WAV files."""
     patch_folders = []
     
-    # Look for directories that contain an 'unprocessed' subfolder
+    # Look for directories that contain WAV files
     for item in os.listdir(root_folder):
         item_path = os.path.join(root_folder, item)
         if os.path.isdir(item_path):
-            unprocessed_path = os.path.join(item_path, UNPROCESSED_FOLDER)
-            if os.path.exists(unprocessed_path) and os.path.isdir(unprocessed_path):
+            # Skip already processed folders
+            if item.startswith("processed_"):
+                continue
+            
+            # Check if folder contains WAV files
+            wav_files = glob.glob(os.path.join(item_path, "*.wav"))
+            if wav_files:
                 patch_folders.append(item_path)
     
     return sorted(patch_folders)
@@ -92,15 +102,18 @@ Configuration is loaded from config.py:
 Structure expected (when no folder specified):
   {OUTPUT_DIR}/
   ├── Patch1/
-  │   ├── sample1.wav          (processed)
-  │   ├── sample2.wav          (processed)
-  │   └── {UNPROCESSED_FOLDER}/
-  │       ├── sample1.wav      (original)
-  │       └── sample2.wav      (original)
+  │   ├── sample1.wav          (original)
+  │   └── sample2.wav          (original)
   └── Patch2/
-      ├── sample1.wav          (processed)
-      └── {UNPROCESSED_FOLDER}/
-          └── sample1.wav      (original)
+      └── sample1.wav          (original)
+
+Processed files will be saved to new folders:
+  {OUTPUT_DIR}/
+  ├── processed_Patch1/
+  │   ├── sample1.wav          (processed)
+  │   └── sample2.wav          (processed)
+  └── processed_Patch2/
+      └── sample1.wav          (processed)
         """
     )
     
@@ -124,9 +137,8 @@ Structure expected (when no folder specified):
     # Determine processing mode
     # Check if this folder directly contains WAV files (single patch mode)
     direct_wav_files = glob.glob(os.path.join(args.folder, "*.wav"))
-    unprocessed_subfolder = os.path.join(args.folder, UNPROCESSED_FOLDER)
     
-    if direct_wav_files or os.path.exists(unprocessed_subfolder):
+    if direct_wav_files:
         # Single patch mode
         patches_to_process = [args.folder]
         mode = "single patch"
@@ -137,9 +149,9 @@ Structure expected (when no folder specified):
     
     if not patches_to_process:
         if mode == "single patch":
-            print(f"Error: No WAV files or '{UNPROCESSED_FOLDER}' folder found in '{args.folder}'")
+            print(f"Error: No WAV files found in '{args.folder}'")
         else:
-            print(f"Error: No patch folders with '{UNPROCESSED_FOLDER}' subfolders found in '{args.folder}'")
+            print(f"Error: No patch folders with WAV files found in '{args.folder}'")
         sys.exit(1)
     
     # Show processing information
@@ -158,18 +170,13 @@ Structure expected (when no folder specified):
     print(f"\nPatches to process:")
     for patch_folder in patches_to_process:
         patch_name = os.path.basename(patch_folder)
-        unprocessed_folder = os.path.join(patch_folder, UNPROCESSED_FOLDER)
-        if os.path.exists(unprocessed_folder):
-            unprocessed_files = glob.glob(os.path.join(unprocessed_folder, "*.wav"))
-            print(f"  • {patch_name} ({len(unprocessed_files)} unprocessed files)")
-        else:
-            direct_files = glob.glob(os.path.join(patch_folder, "*.wav"))
-            print(f"  • {patch_name} ({len(direct_files)} files, no {UNPROCESSED_FOLDER} folder)")
-    
+        wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
+        print(f"  • {patch_name} ({len(wav_files)} WAV files)")
+
     if args.dry_run:
         print(f"\n🔍 DRY RUN MODE - No files will be modified")
         print(f"\nProcessing would include:")
-        print(f"  • Copy files from '{UNPROCESSED_FOLDER}' folders to patch roots")
+        print(f"  • Copy files to new 'processed_PATCHNAME' folders")
         print(f"  • Silence removal and trimming (threshold: {SILENCE_THRESHOLD_DB} dB)")
         print(f"  • Fade in/out application ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
         print(f"  • Patch-wide normalization to {TARGET_PEAK_DB} dB")
@@ -178,7 +185,8 @@ Structure expected (when no folder specified):
     
     # Confirm processing
     total_patches = len(patches_to_process)
-    print(f"\n⚠️  This will process {total_patches} patch folder(s) and overwrite processed samples!")
+    print(f"\n⚡ This will process {total_patches} patch folder(s) and create new 'processed_PATCHNAME' folders.")
+    print("Original files will remain untouched.")
     response = input("Continue? (y/N): ").strip().lower()
     if response not in ['y', 'yes']:
         print("Processing cancelled.")
@@ -197,33 +205,14 @@ Structure expected (when no folder specified):
             patch_name = os.path.basename(patch_folder)
             print(f"\n[{i}/{total_patches}] Processing: {patch_name}")
             
-            # Check if this is a single patch with unprocessed folder
-            unprocessed_folder = os.path.join(patch_folder, UNPROCESSED_FOLDER)
-            if os.path.exists(unprocessed_folder):
-                success = process_single_patch(
-                    patch_folder=patch_folder,
-                    sample_rate=SAMPLE_RATE,
-                    target_peak_db=TARGET_PEAK_DB,
-                    fade_in_ms=FADE_IN_MS,
-                    fade_out_ms=FADE_OUT_MS
-                )
-            else:
-                # Process directly (no unprocessed folder)
-                print(f"  No '{UNPROCESSED_FOLDER}' folder, processing files directly")
-                success, processing_errors = process_patch_folder(
-                    patch_folder=patch_folder,
-                    sample_rate=SAMPLE_RATE,
-                    target_peak_db=TARGET_PEAK_DB,
-                    fade_in_ms=FADE_IN_MS,
-                    fade_out_ms=FADE_OUT_MS,
-                    silence_threshold_db=SILENCE_THRESHOLD_DB
-                )
-                
-                # Report any processing errors
-                if processing_errors:
-                    print(f"    Warnings: {len(processing_errors)} samples had issues")
-                    for error in processing_errors:
-                        print(f"      {error['filename']}: {error['description']}")
+            # Use the new non-destructive processing method
+            success = process_single_patch(
+                patch_folder=patch_folder,
+                sample_rate=SAMPLE_RATE,
+                target_peak_db=TARGET_PEAK_DB,
+                fade_in_ms=FADE_IN_MS,
+                fade_out_ms=FADE_OUT_MS
+            )
             
             if success:
                 success_count += 1

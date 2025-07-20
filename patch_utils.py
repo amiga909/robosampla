@@ -75,6 +75,17 @@ def load_patches(filename='patches.json'):
         }]
 
 
+def save_patches(patches, filename='patches.json'):
+    """Save patches to a JSON file."""
+    try:
+        with open(filename, 'w') as f:
+            json.dump(patches, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error saving patches to {filename}: {e}")
+        return False
+
+
 def safe_filename(name):
     """Create a safe filename by removing/replacing problematic characters."""
     # Replace # with 'sharp' and remove other problematic characters

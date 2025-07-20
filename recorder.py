@@ -10,9 +10,9 @@ from midi_utils import (
     send_bank_select, midi_note_to_name
 )
 from audio_utils import get_device_channels, save_audio
-from patch_utils import safe_filename, create_patch_folder
-from audio_processor import process_recorded_sample, process_patch_folder
-from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB, UNPROCESSED_FOLDER
+from patch_utils import safe_filename, create_patch_folder, save_patches
+#from audio_processor import process_recorded_sample, process_patch_folder
+from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB  # UNPROCESSED_FOLDER removed
 import sounddevice as sd
 import numpy as np
 
@@ -21,13 +21,14 @@ clipping_errors = []
 short_sample_errors = []
 
 
-def check_for_clipping(audio_data, filename, clipping_threshold=0.99):
+def check_for_clipping(audio_data, filename, patch_name=None, clipping_threshold=0.99):
     """
     Check if audio contains clipping and log warnings.
     
     Args:
         audio_data: numpy array of audio samples (float, typically -1 to 1 range)
         filename: name of the file for logging
+        patch_name: name of the patch for logging (optional)
         clipping_threshold: threshold above which we consider it clipping (default 0.99)
     
     Returns:
@@ -42,7 +43,11 @@ def check_for_clipping(audio_data, filename, clipping_threshold=0.99):
     clipping_percentage = (clipped_samples / total_samples) * 100
     
     if clipped_samples > 0:
-        error_msg = f"CLIPPING in {filename}: Peak {peak_value:.4f}, {clipped_samples}/{total_samples} samples ({clipping_percentage:.2f}%)"
+        # Include patch name in error message if provided
+        if patch_name:
+            error_msg = f"CLIPPING in patch '{patch_name}' - {filename}: Peak {peak_value:.4f}, {clipped_samples}/{total_samples} samples ({clipping_percentage:.2f}%)"
+        else:
+            error_msg = f"CLIPPING in {filename}: Peak {peak_value:.4f}, {clipped_samples}/{total_samples} samples ({clipping_percentage:.2f}%)"
         clipping_errors.append(error_msg)
         print(f"  ⚠️  {error_msg}")
         return True
@@ -53,7 +58,7 @@ def check_for_clipping(audio_data, filename, clipping_threshold=0.99):
 
 def record_and_process_note(outport, note, patch, patch_folder, sample_rate, audio_device, filename):
     """
-    Record and process a single note with timeout protection.
+    Record and process a single note  
     
     Args:
         outport: MIDI output port
@@ -64,13 +69,11 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
         audio_device: audio device for recording
         filename: filename for the recorded sample (without .wav extension)
     """
-    import threading
-    import signal
-    
     print(f'Playing note: {note} ({filename})')
-    
-    # Calculate total recording time (note duration + note_gap for reverb tail)
-    record_duration = patch['note_duration'] + patch['note_gap']
+
+    RECORD_START_BUFFER = 0.5  # Buffer time before recording starts (to ensure MIDI is sent)
+    # Calculate total recording time (note duration + note_gap)
+    record_duration = patch['note_duration'] + patch['note_gap'] + RECORD_START_BUFFER
     
     # Determine number of channels based on patch setting and device capabilities
     if patch.get('mono', False):
@@ -83,97 +86,62 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
         if channels == 1:
             print(f"Recording in MONO (device limitation)")
     
-    recording = None
-    recording_error = None
-    
-    def record_with_timeout():
-        nonlocal recording, recording_error
-        try:
-            print(f"  🎤 Starting recording: {record_duration:.1f}s, {channels}ch, {sample_rate}Hz, device={audio_device}")
-            
-            # Start recording
-            recording = sd.rec(int(record_duration * sample_rate), 
-                             samplerate=sample_rate, channels=channels, 
-                             dtype='float64', device=audio_device)
-            
-            print(f"  📡 Recording started, sending MIDI...")
-            
-            # Small delay to ensure recording starts before MIDI
-            time.sleep(0.5)
-            
-            # Send MIDI note
-            send_note_on(outport, note, patch['velocity'], patch['midi_channel'])
-            print(f"  🎹 MIDI Note ON sent: {note} vel={patch['velocity']} ch={patch['midi_channel']}")
-            time.sleep(patch['note_duration'])
-            send_note_off(outport, note, patch['midi_channel'])
-            print(f"  🎹 MIDI Note OFF sent: {note}")
-
-            print(f"  ⏳ Waiting for recording to complete...")
-            # Wait for recording to finish with timeout
-            sd.wait()
-            print(f"  ✅ Recording completed successfully")
-            
-        except Exception as e:
-            recording_error = f"Recording error: {e}"
-            print(f"  ❌ {recording_error}")
-    
-    # Start recording in a separate thread
-    record_thread = threading.Thread(target=record_with_timeout)
-    record_thread.daemon = True
-    record_thread.start()
-    
-    # Wait for recording to complete with timeout
-    timeout_seconds = record_duration + 10.0  # Extra 10 seconds buffer
-    record_thread.join(timeout=timeout_seconds)
-    
-    if record_thread.is_alive():
-        print(f"  ⚠️  Recording timeout after {timeout_seconds:.1f}s")
-        try:
-            sd.stop()  # Stop any ongoing recording
-            time.sleep(0.5)
-        except:
-            pass
-        
-        # Try emergency reset
-        if emergency_audio_reset():
-            print(f"  ⚠️  TIMEOUT RECOVERED: Note {note} recording failed but audio system reset - continuing")
-        else:
-            print(f"  ❌ TIMEOUT: Note {note} recording failed and reset failed - skipping")
-        return False
-    
-    if recording_error:
-        print(f"  ❌ ERROR: {recording_error} - skipping note {note}")
-        return False
-    
-    if recording is None:
-        print(f"  ❌ ERROR: No audio data recorded for note {note} - skipping")
-        return False
-    
     try:
+        print(f"  🎤 Starting recording: {record_duration:.1f}s, {channels}ch, {sample_rate}Hz, device={audio_device}")
+        
+        # Start recording (simplified approach like the working earlier version)
+        recording = sd.rec(int(record_duration * sample_rate), 
+                         samplerate=sample_rate, channels=channels, 
+                         dtype='float64', device=audio_device)
+        
+        print(f"  📡 Recording started, sending MIDI...")
+        
+        # always have silence before
+        time.sleep(RECORD_START_BUFFER)
+        
+        # Send MIDI note ON
+        print(f"  🎹 Sending MIDI Note ON: {note} vel={patch['velocity']} ch={patch['midi_channel']}")
+        send_note_on(outport, note, patch['velocity'], patch['midi_channel'])
+
+        # Wait for note duration (simplified - no chunking to avoid complexity)
+        print(f"  ⏳ MIDI Note ON sent - Waiting {patch['note_duration']}s for note duration...")
+        time.sleep(patch['note_duration'])
+
+        # Send MIDI note OFF
+        send_note_off(outport, note, patch['midi_channel'])
+        print(f"  🎹 Note duration completed - Sent MIDI Note OFF: {note} ch={patch['midi_channel']}")
+        
+        # Wait for the recording to complete (like earlier version - no sd.wait(), just calculated time)
+        remaining_time = patch['note_gap']  # Just wait for the reverb tail
+        if remaining_time > 0:
+            print(f"  ⏳ Waiting  {remaining_time:.1f}s for release tail...")
+            time.sleep(remaining_time)
+        
+        print(f"  ✅ Recording time completed")
+        sd.stop()  # Stop current recording stream
+        time.sleep(0.1)
         # Check for clipping in the recorded audio
         wav_filename = f"{filename}.wav"
-        check_for_clipping(recording, wav_filename)
+        check_for_clipping(recording, wav_filename, patch['name'])
         
         # Save the audio file
         filepath = os.path.join(patch_folder, wav_filename)
         shape = save_audio(recording, filepath, sample_rate)
         print(f"  Saved: {filepath} ({shape})")
         
-        # Create unprocessed subfolder and save original
-        unprocessed_folder = os.path.join(patch_folder, UNPROCESSED_FOLDER)
-        os.makedirs(unprocessed_folder, exist_ok=True)
-        unprocessed_filepath = os.path.join(unprocessed_folder, wav_filename)
-        
-        # Copy original file to unprocessed folder
-        import shutil
-        shutil.copy2(filepath, unprocessed_filepath)
-        
-        # Small delay  
-        time.sleep(0.5)
+        # Small delay before next note
+        time.sleep(0.1)
         return True
         
     except Exception as e:
-        print(f"  ❌ ERROR saving note {note}: {e}")
+        print(f"  ❌ ERROR recording note {note}: {e}")
+        
+        # Try emergency reset on any error
+        try:
+            emergency_audio_reset()
+        except:
+            pass
+        
         return False
 
 
@@ -257,7 +225,7 @@ def check_sample_lengths(patch_folder, patch_name, min_ratio=0.3):
         return []
 
 
-def play_patch(outport, patch, sample_rate=44100, audio_device=None):
+def play_patch(outport, patch, sample_rate=44100, audio_device=None, patches_list=None, patches_filename=None):
     """Play a single patch configuration and record audio."""
     patch_start_time = time.time()
     
@@ -325,6 +293,26 @@ def play_patch(outport, patch, sample_rate=44100, audio_device=None):
     print(f"Checking sample consistency for patch: {patch['name']}")
     check_sample_lengths(patch_folder, patch['name'])
     
+    # Mark patch as successfully recorded if we have the patches list and filename
+    # Only mark as skip if recording was successful (some failures are acceptable)
+    recording_success_rate = (total_notes - len(failed_notes)) / total_notes if total_notes > 0 else 0.0
+    
+    if patches_list is not None and patches_filename is not None and recording_success_rate >= 0.5:  # At least 50% success
+        # Find and update this patch in the patches list
+        for i, p in enumerate(patches_list):
+            if p.get('name') == patch['name']:
+                patches_list[i]['skip'] = True
+                print(f"  ✅ Marked patch '{patch['name']}' as skip=true (success rate: {recording_success_rate:.1%})")
+                
+                # Save the updated patches file
+                if save_patches(patches_list, patches_filename):
+                    print(f"  💾 Updated {patches_filename}")
+                else:
+                    print(f"  ⚠️  Failed to save {patches_filename}")
+                break
+    elif recording_success_rate < 0.5:
+        print(f"  ⚠️  Patch '{patch['name']}' not marked as complete due to low success rate ({recording_success_rate:.1%})")
+    
     # Calculate and log patch processing time
     patch_end_time = time.time()
     patch_duration = patch_end_time - patch_start_time
@@ -338,7 +326,7 @@ def play_patch(outport, patch, sample_rate=44100, audio_device=None):
         print(f"⏱️  Patch '{patch['name']}' completed in {patch_seconds:.1f}s")
 
 
-def record_all_patches(patches, midi_port_name, sample_rate=44100, audio_device=None):
+def record_all_patches(patches, midi_port_name, sample_rate=44100, audio_device=None, patches_filename=None):
     """Record all patches with MIDI and audio recording."""
     global clipping_errors, short_sample_errors
     clipping_errors = []  # Reset clipping errors for this session
@@ -370,7 +358,7 @@ def record_all_patches(patches, midi_port_name, sample_rate=44100, audio_device=
                     print(f"Skipping patch '{patch['name']}' (skip=true)")
                     continue
                 
-                play_patch(outport, patch, sample_rate, audio_device)
+                play_patch(outport, patch, sample_rate, audio_device, patches, patches_filename)
                 processed_count += 1
                 
                 # Add a pause between patches
@@ -447,10 +435,51 @@ def emergency_audio_reset():
         print("  🚨 Attempting emergency audio reset...")
         sd.stop()  # Stop all streams
         time.sleep(1.0)
-        sd.reset()  # Reset sounddevice
+        
+        # Additional macOS-specific reset for Core Audio
+        try:
+            # Reset the default device to flush Core Audio state
+            default_device = sd.default.device
+            sd.default.reset()
+            time.sleep(0.5)
+            sd.default.device = default_device
+            print("  🔄 Core Audio state reset")
+        except Exception as reset_error:
+            print(f"  ⚠️  Core Audio reset warning: {reset_error}")
+        
         time.sleep(1.0)
         print("  ✅ Audio system reset complete")
         return True
     except Exception as e:
         print(f"  ❌ Audio reset failed: {e}")
+        return False
+
+
+ 
+    """Diagnose audio device capabilities and current state."""
+    try:
+        device_info = sd.query_devices(device_id)
+        print(f"  🔍 Audio Device Diagnostics:")
+        print(f"    Device: {device_info['name']}")
+        print(f"    Max input channels: {device_info['max_input_channels']}")
+        print(f"    Max output channels: {device_info['max_output_channels']}")
+        print(f"    Default sample rate: {device_info['default_samplerate']}")
+        print(f"    Host API: {sd.query_hostapis(device_info['hostapi'])['name']}")
+        
+        # Check if device supports our recording parameters
+        try:
+            sd.check_input_settings(device=device_id, channels=2, samplerate=44100)
+            print(f"    ✅ Supports stereo @ 44.1kHz")
+        except Exception as e:
+            print(f"    ❌ Stereo @ 44.1kHz not supported: {e}")
+            
+        try:
+            sd.check_input_settings(device=device_id, channels=1, samplerate=44100)
+            print(f"    ✅ Supports mono @ 44.1kHz")
+        except Exception as e:
+            print(f"    ❌ Mono @ 44.1kHz not supported: {e}")
+            
+        return True
+    except Exception as e:
+        print(f"  ❌ Device diagnostics failed: {e}")
         return False

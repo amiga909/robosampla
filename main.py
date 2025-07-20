@@ -20,25 +20,6 @@ from recorder import record_all_patches
 
 def main():
     """Main application function."""
-    import signal
-    import sys
-    
-    def timeout_handler(signum, frame):
-        print("\n⚠️  APPLICATION TIMEOUT - The recording process appears to be stuck.")
-        print("This might be due to:")
-        print("  • Audio device issues")
-        print("  • MIDI device problems") 
-        print("  • System resource constraints")
-        print("\nTry:")
-        print("  • Restarting the application")
-        print("  • Checking audio/MIDI device connections")
-        print("  • Running setup.py to reconfigure devices")
-        sys.exit(1)
-    
-    # Set up a global timeout (30 minutes)
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(1800)  # 30 minutes timeout
-    
     print("=== RoboSampla - Automated Synthesizer Sampler ===\n")
     
     try:
@@ -59,7 +40,8 @@ def main():
             patches=patches,
             midi_port_name=MIDI_PORT_NAME,
             sample_rate=SAMPLE_RATE,
-            audio_device=AUDIO_DEVICE
+            audio_device=AUDIO_DEVICE,
+            patches_filename=PATCHES_FILE
         )
         
         if not success:
@@ -71,10 +53,10 @@ def main():
             sys.exit(1)
         
         print("\n=== Recording completed successfully! ===")
-        
-    finally:
-        # Cancel the timeout alarm
-        signal.alarm(0)
+    
+    except Exception as e:
+        print(f"\nError: {e}")
+        sys.exit(1)
 
 
 if __name__ == '__main__':

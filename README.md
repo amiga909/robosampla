@@ -4,17 +4,19 @@ An automated tool for sampling synthesizers by playing MIDI notes and recording 
 
 # Install
 
-- Edit config.py and patches.json
-- pip install -r requirements.txt
+- `pip install -r requirements.txt`
+- Edit config.py and `_patches.json`
 
 # Commands
 
-- caffeinate -di python main.py // use caffeinate on mac to keep recording going
+- `caffeinate -di python main.py` // use caffeinate on mac to keep recording going
+- then: `python utils/process_audio` // manually for now
 
+Utils:
+
+- `python utils/program_change.py 69` // tests a PC and sends low and high notes to configure the JSON
+- `python utils/test_patches.py` // send some musical notes to hear the generated patch
 - python utils/setup.py
-- python main.py
-- python utils/program_change.py 69
-- python utils/test_patches.y
 
 - caffeinate -di python main.py
 
