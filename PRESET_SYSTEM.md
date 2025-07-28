@@ -134,9 +134,47 @@ load_plugin_preset(plugin, "Binary Preset: my_settings")
 ## Compatibility
 
 - **AU Plugins**: Full support with parameter and raw_state access
-- **VST3 Plugins**: Full support where compatible
+- **VST3 Plugins**: Full support where compatible (some plugins may have loading issues)
 - **VST2 Plugins**: Parameter support (limited raw_state)
 - **Older Pedalboard**: Graceful fallbacks for missing features
+
+## Common Issues and Solutions
+
+### Plugin Won't Load: "unsupported plugin format or scan failure"
+
+**Problem**: Some plugins (like Emissary) fail to load even when properly installed.
+
+**Causes**:
+
+1. **Wrong plugin type in wrong directory**: VST plugins moved to AU Components directory
+2. **Plugin compatibility issues**: Some plugins don't work with pedalboard
+3. **Missing dependencies**: Plugin requires libraries not available
+4. **Code signing issues**: Unsigned or incorrectly signed plugins
+
+**Solutions**:
+
+1. **Check plugin type**: Ensure AU plugins are in `/Library/Audio/Plug-Ins/Components/`
+2. **Use AU versions**: AU plugins generally work better than VST on macOS
+3. **Validate with `auval -a`**: Check if AU plugins are properly registered
+4. **Try alternative plugins**: Some plugins simply don't work with pedalboard
+
+### Moving Plugins Manually
+
+**DON'T**: Simply copy/move plugin files between directories
+**DO**: Use proper installers or validate plugin structure
+
+**Example of incorrect approach**:
+
+```bash
+# ❌ Wrong - this can break plugins
+mv some_plugin.vst /Library/Audio/Plug-Ins/Components/some_plugin.component
+```
+
+**Correct approach**:
+
+- Use the plugin's original installer
+- Verify plugin appears in `auval -a` (for AU plugins)
+- Test loading before moving files
 
 ## GitHub References
 
