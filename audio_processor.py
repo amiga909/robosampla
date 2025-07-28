@@ -9,13 +9,19 @@ import numpy as np
 from scipy import signal
 
 
-def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -55.0) -> AudioSegment:
+def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -55.0, min_silence_ms: float = 500.0) -> AudioSegment:
     """
-    Remove silence from the beginning and end of audio, plus last 50ms to remove recording artifacts.
+    Remove silence from the beginning and end of audio using adaptive silence detection.
+    
+    Steps:
+    1. Remove last 50ms (recording artifacts)
+    2. Analyze last 500ms to determine silence threshold
+    3. Remove silence from beginning and end based on this threshold
     
     Args:
         audio_segment: AudioSegment object
-        silence_threshold_db: Threshold in dB below which audio is considered silence
+        silence_threshold_db: Fallback threshold in dB (not used in adaptive mode)
+        min_silence_ms: Minimum silence duration to detect for trimming (milliseconds)
     
     Returns:
         Trimmed AudioSegment
@@ -23,10 +29,28 @@ def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -5
     if len(audio_segment) == 0:
         return audio_segment
     
-    # First, remove last 50ms to eliminate recording artifacts/noises
+    # Step 1: Remove last 50ms to eliminate recording artifacts/noises
     if len(audio_segment) > 50:
         audio_segment = audio_segment[:-50]
     
+    if len(audio_segment) == 0:
+        return audio_segment
+    
+    # Step 2: Get the max peak in last 500ms of sample to use as silence threshold
+    tail_analysis_ms = min(500, len(audio_segment))  # Don't exceed sample length
+    tail_segment = audio_segment[-tail_analysis_ms:]
+    
+    # Get the peak level in the tail - this represents our "silence" level
+    tail_peak_db = tail_segment.max_dBFS
+    
+    # If tail is completely silent, use the provided threshold
+    if tail_peak_db == -float('inf'):
+        silence_threshold_db_actual = silence_threshold_db
+    else:
+        # Use the tail peak as our silence threshold (maybe add small margin)
+        silence_threshold_db_actual = tail_peak_db + 3.0  # 3dB margin above tail noise
+    
+    # Step 3: Remove silence from beginning and end using this adaptive threshold
     # Convert to numpy array for analysis
     samples = np.array(audio_segment.get_array_of_samples())
     
@@ -39,55 +63,24 @@ def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -5
     
     # Convert threshold from dB to linear amplitude
     max_amplitude = 32767.0 if audio_segment.sample_width == 2 else 2147483647.0
-    threshold_linear = max_amplitude * (10 ** (silence_threshold_db / 20))
+    threshold_linear = max_amplitude * (10 ** (silence_threshold_db_actual / 20))
     
-    # Find non-silent regions
-    non_silent = samples_mono > threshold_linear
+    # Find non-silent samples
+    above_threshold = samples_mono > threshold_linear
     
-    if not np.any(non_silent):
-        return audio_segment  # All silent, return as-is
+    if not np.any(above_threshold):
+        return audio_segment  # No samples above threshold, return as-is
     
     # Find first and last non-silent samples
-    non_silent_indices = np.where(non_silent)[0]
-    start_sample = non_silent_indices[0]
-    
-    # For the end, find the last significant non-silent region
-    # Look backwards from the end to find sustained non-silent content
-    window_size = int(audio_segment.frame_rate * 0.1)  # 100ms window
-    end_sample = non_silent_indices[-1]
-    
-    # Search backwards for a window with consistent non-silent content
-    for i in range(len(samples_mono) - window_size, start_sample, -window_size):
-        window = samples_mono[max(0, i):i + window_size]
-        non_silent_ratio = np.sum(window > threshold_linear) / len(window)
-        if non_silent_ratio > 0.3:  # At least 30% of window is non-silent
-            end_sample = i + window_size - 1
-            break
+    non_silent_indices = np.where(above_threshold)[0]
+    first_sound = non_silent_indices[0]
+    last_sound = non_silent_indices[-1]
     
     # Convert to milliseconds
-    start_ms = int(start_sample * 1000 / audio_segment.frame_rate)
-    end_ms = int((end_sample + 1) * 1000 / audio_segment.frame_rate)
-    
-    # Ensure minimum 100ms sample length
-    end_ms = max(start_ms + 100, end_ms)
+    start_ms = int(first_sound * 1000 / audio_segment.frame_rate)
+    end_ms = int((last_sound + 1) * 1000 / audio_segment.frame_rate)  # +1 to include the last sample
     
     return audio_segment[start_ms:end_ms]
-
-
-def convert_to_16bit(audio_segment: AudioSegment) -> AudioSegment:
-    """
-    Convert audio to 16-bit if it's not already.
-    
-    Args:
-        audio_segment: AudioSegment object
-    
-    Returns:
-        AudioSegment converted to 16-bit
-    """
-    if audio_segment.sample_width != 2:  # Not 16-bit
-        # Convert to 16-bit using pydub's built-in conversion
-        return audio_segment.set_sample_width(2)
-    return audio_segment
 
 
 def normalize_peak(audio_segment: AudioSegment, target_peak_db: float = -6.0) -> AudioSegment:
@@ -293,17 +286,17 @@ def process_sample(input_file: str, output_file: str = None,
                   target_peak_db: float = -1.0,
                   quiet_start_threshold_db: float = -5.0,
                   fade_in_ms: float = 5.0,
-                  fade_out_ms: float = 5.0) -> bool:
+                  fade_out_ms: float = 5.0,
+                  min_silence_ms: float = 500.0) -> bool:
     """
     Process a single audio sample through the complete chain.
     
     Processing chain:
-    1. Convert to 16-bit if needed
-    2. Remove silence from beginning and end
-    3. Normalize to target peak level
-    4. Remove quiet parts from beginning (until threshold)
-    5. Apply fade in/out
-    6. Analyze sample quality
+    1. Remove silence from beginning and end (includes 50ms end removal)
+    2. Normalize to target peak level
+    3. Remove quiet parts from beginning (until threshold)
+    4. Apply fade in/out
+    5. Analyze sample quality
     
     Args:
         input_file: Path to input WAV file
@@ -313,6 +306,7 @@ def process_sample(input_file: str, output_file: str = None,
         quiet_start_threshold_db: Minimum level for sample start
         fade_in_ms: Fade in duration
         fade_out_ms: Fade out duration
+        min_silence_ms: Minimum silence duration to detect for trimming
     
     Returns:
         Tuple of (success, analysis_result)
@@ -328,35 +322,31 @@ def process_sample(input_file: str, output_file: str = None,
         original_length = len(audio)
         original_bit_depth = audio.sample_width * 8
         
-        # Step 1: Convert to 16-bit if needed
-        audio = convert_to_16bit(audio)
-        
-        # Step 2: Remove silence from beginning and end
-        length_after_16bit = len(audio)
-        audio = remove_silence(audio, silence_threshold_db)
+        # Step 1: Remove silence from beginning and end (includes 50ms end removal)
+        audio = remove_silence(audio, silence_threshold_db, min_silence_ms)
         if len(audio) == 0:
             print(f"  {os.path.basename(input_file)}: All silence, skipping")
             return False
         length_after_silence = len(audio)
         
-        # Step 3: Normalize to target peak
+        # Step 2: Normalize to target peak
         audio = normalize_peak(audio, target_peak_db)
         
-        # Step 4: Remove quiet start (after normalization)
-        #audio = remove_quiet_start(audio, quiet_start_threshold_db)
+        # Step 3: Remove quiet start (after normalization)
+        audio = remove_quiet_start(audio, quiet_start_threshold_db)
         if len(audio) == 0:
             print(f"  {os.path.basename(input_file)}: No loud content, skipping")
             return False
         length_after_quiet_removal = len(audio)
         
-        # Step 5: Apply fades
+        # Step 4: Apply fades
         audio = apply_fade(audio, fade_in_ms, fade_out_ms)
         
         # Save result
         output_path = output_file if output_file else input_file
         audio.export(output_path, format="wav")
         
-        # Step 6: Analyze sample quality
+        # Step 5: Analyze sample quality
         filename = os.path.basename(input_file)
         analysis = analyze_sample(audio, filename)
         
@@ -365,12 +355,12 @@ def process_sample(input_file: str, output_file: str = None,
         final_peak = audio.max_dBFS
         
         # Calculate silence removed
-        silence_removed_ms = length_after_16bit - length_after_silence
+        silence_removed_ms = original_length - length_after_silence
         quiet_start_removed_ms = length_after_silence - length_after_quiet_removal
         total_removed_ms = silence_removed_ms + quiet_start_removed_ms
         total_removed_sec = total_removed_ms / 1000.0
         
-        bit_depth_info = f" (converted from {original_bit_depth}-bit)" if original_bit_depth != 16 else ""
+        bit_depth_info = f" ({original_bit_depth}-bit)" if original_bit_depth != 16 else ""
         silence_info = f", removed {total_removed_sec:.1f}s silence" if total_removed_ms > 0 else ""
         issues_info = f" ⚠️ {', '.join(analysis['issues'])}" if analysis['issues'] else ""
         #print(f"  {filename}: {original_length}ms -> {final_length}ms, peak: {final_peak:.1f}dB{bit_depth_info}{silence_info}{issues_info}")
@@ -395,7 +385,8 @@ def process_patch_folder(patch_folder: str,
                         target_peak_db: float = -6.0,
                         quiet_start_threshold_db: float = -5.0,
                         fade_in_ms: float = 5.0,
-                        fade_out_ms: float = 5.0) -> tuple[bool, list]:
+                        fade_out_ms: float = 5.0,
+                        min_silence_ms: float = 500.0) -> tuple[bool, list]:
     """
     Process all WAV files in a patch folder.
     
@@ -406,6 +397,7 @@ def process_patch_folder(patch_folder: str,
         quiet_start_threshold_db: Minimum level for sample start
         fade_in_ms: Fade in duration
         fade_out_ms: Fade out duration
+        min_silence_ms: Minimum silence duration to detect for trimming
     
     Returns:
         Tuple of (success, list_of_errors)
@@ -444,7 +436,8 @@ def process_patch_folder(patch_folder: str,
             target_peak_db=target_peak_db,
             quiet_start_threshold_db=quiet_start_threshold_db,
             fade_in_ms=fade_in_ms,
-            fade_out_ms=fade_out_ms
+            fade_out_ms=fade_out_ms,
+            min_silence_ms=min_silence_ms
         )
         
         analysis_results.append(analysis)

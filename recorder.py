@@ -260,8 +260,12 @@ def play_patch(outport, patch, sample_rate=44100, audio_device=None, patches_lis
         print(f"Drum patch with {len(patch['notes'])} specific notes")
         for note_str, drum_name in patch['notes'].items():
             note = int(note_str)
+            
+            # Exception for airbase hihat MIDI note numbers: use 41 in filename but play original note
+            filename_note = 41 if note == 43 else note
+            
             safe_drum_name = safe_filename(drum_name)
-            filename = f"{patch['name']}_{safe_drum_name}"
+            filename = f"{filename_note}_{safe_drum_name}_{patch['name']}"
             total_notes += 1
             success = record_and_process_note(outport, note, patch, patch_folder, sample_rate, audio_device, filename)
             if not success:

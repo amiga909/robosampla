@@ -1,6 +1,7 @@
 [
   {
     "name": "House!",
+    "midi_channel": 9,
     "program_change": 0,
     "type": "airbase",
     "note_gap": 1,

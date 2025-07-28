@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audio_processor import process_patch_folder
 from config import (SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, 
-                   TARGET_PEAK_DB, QUIET_START_THRESHOLD_DB, OUTPUT_DIR)
+                   TARGET_PEAK_DB, QUIET_START_THRESHOLD_DB, OUTPUT_DIR, MIN_SILENCE_DURATION_MS)
 
 
 def process_single_patch(patch_folder):
@@ -49,7 +49,8 @@ def process_single_patch(patch_folder):
         target_peak_db=TARGET_PEAK_DB,
         quiet_start_threshold_db=QUIET_START_THRESHOLD_DB,
         fade_in_ms=FADE_IN_MS,
-        fade_out_ms=FADE_OUT_MS
+        fade_out_ms=FADE_OUT_MS,
+        min_silence_ms=MIN_SILENCE_DURATION_MS
     )
     
     # Report any processing errors
