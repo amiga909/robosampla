@@ -13,11 +13,12 @@ import shutil
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audio_processor import process_patch_folder
-from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB, OUTPUT_DIR, SAMPLE_RATE
+from config import (SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, 
+                   TARGET_PEAK_DB, QUIET_START_THRESHOLD_DB, OUTPUT_DIR)
 
 
-def process_single_patch(patch_folder, sample_rate, target_peak_db, fade_in_ms, fade_out_ms):
-    """Process a single patch folder by copying to a new 'processed_PATCHNAME' folder and processing."""
+def process_single_patch(patch_folder):
+    """Process a single patch folder by copying to a new patch folder inside '_processed' directory."""
     patch_name = os.path.basename(patch_folder)
     
     # Get WAV files from root patch folder
@@ -26,31 +27,29 @@ def process_single_patch(patch_folder, sample_rate, target_peak_db, fade_in_ms, 
         print(f"  Warning: No WAV files found in {patch_name}")
         return False
     
-    print(f"  Found {len(wav_files)} files to process")
-    
-    # Create processed folder in the same parent directory as the original
+    # Create _processed directory in the same parent directory as the original
     parent_dir = os.path.dirname(patch_folder)
-    processed_folder_name = f"_processed_{patch_name}"
-    processed_folder = os.path.join(parent_dir, processed_folder_name)
+    processed_base_dir = os.path.join(parent_dir, "_processed")
+    processed_patch_folder = os.path.join(processed_base_dir, patch_name)
     
-    # Create the processed folder
-    os.makedirs(processed_folder, exist_ok=True)
-    print(f"  Created processed folder: {processed_folder_name}")
+    # Create the processed directories
+    os.makedirs(processed_patch_folder, exist_ok=True)
+    print(f"  Created processed folder: _processed/{patch_name}")
     
-    # Copy all WAV files to the processed folder
+    # Copy all WAV files to the processed patch folder
     for wav_file in wav_files:
         filename = os.path.basename(wav_file)
-        dest_path = os.path.join(processed_folder, filename)
+        dest_path = os.path.join(processed_patch_folder, filename)
         shutil.copy2(wav_file, dest_path)
     
     # Process the processed folder (leaving original untouched)
     success, processing_errors = process_patch_folder(
-        patch_folder=processed_folder,
-        sample_rate=sample_rate,
-        target_peak_db=target_peak_db,
-        fade_in_ms=fade_in_ms,
-        fade_out_ms=fade_out_ms,
-        silence_threshold_db=SILENCE_THRESHOLD_DB
+        patch_folder=processed_patch_folder,
+        silence_threshold_db=SILENCE_THRESHOLD_DB,
+        target_peak_db=TARGET_PEAK_DB,
+        quiet_start_threshold_db=QUIET_START_THRESHOLD_DB,
+        fade_in_ms=FADE_IN_MS,
+        fade_out_ms=FADE_OUT_MS
     )
     
     # Report any processing errors
@@ -70,8 +69,8 @@ def find_patch_folders(root_folder):
     for item in os.listdir(root_folder):
         item_path = os.path.join(root_folder, item)
         if os.path.isdir(item_path):
-            # Skip already processed folders
-            if item.startswith("processed_"):
+            # Skip processed directory and old processed folders
+            if item == "_processed" or item.startswith("processed_"):
                 continue
             
             # Check if folder contains WAV files
@@ -92,10 +91,10 @@ Examples:
   python utils/process_audio.py                                   # Process all patches in output directory
   python utils/process_audio.py _output                          # Process all patches in _output folder
   python utils/process_audio.py _output/House!                   # Process specific patch folder
-  python utils/process_audio.py --dry-run                        # Preview what would be processed
 
 Configuration is loaded from config.py:
   - Target peak level: {TARGET_PEAK_DB} dB
+  - Quiet start threshold: {QUIET_START_THRESHOLD_DB} dB
   - Fade in/out: {FADE_IN_MS}/{FADE_OUT_MS} ms  
   - Silence threshold: {SILENCE_THRESHOLD_DB} dB
 
@@ -109,19 +108,17 @@ Structure expected (when no folder specified):
 
 Processed files will be saved to new folders:
   {OUTPUT_DIR}/
-  ├── processed_Patch1/
-  │   ├── sample1.wav          (processed)
-  │   └── sample2.wav          (processed)
-  └── processed_Patch2/
-      └── sample1.wav          (processed)
+  ├── _processed/
+  │   ├── Patch1/
+  │   │   ├── sample1.wav       (processed)
+  │   │   └── sample2.wav       (processed)
+  │   └── Patch2/
+  │       └── sample1.wav       (processed)
         """
     )
     
     parser.add_argument('folder', nargs='?', default=OUTPUT_DIR,
                        help=f'Path to folder containing patches, or specific patch folder (default: {OUTPUT_DIR})')
-    
-    parser.add_argument('--dry-run', action='store_true',
-                       help='Show what would be processed without making changes')
     
     args = parser.parse_args()
     
@@ -161,7 +158,8 @@ Processed files will be saved to new folders:
     print(f"Mode: {mode}")
     print(f"Base folder: {args.folder}")
     print(f"Patches found: {len(patches_to_process)}")
-    print(f"Target peak: {TARGET_PEAK_DB} dB")
+    print(f"Target peak level: {TARGET_PEAK_DB} dB")
+    print(f"Quiet start threshold: {QUIET_START_THRESHOLD_DB} dB")
     print(f"Fade in: {FADE_IN_MS} ms")
     print(f"Fade out: {FADE_OUT_MS} ms")
     print(f"Silence threshold: {SILENCE_THRESHOLD_DB} dB")
@@ -173,21 +171,20 @@ Processed files will be saved to new folders:
         wav_files = glob.glob(os.path.join(patch_folder, "*.wav"))
         print(f"  • {patch_name} ({len(wav_files)} WAV files)")
 
-    if args.dry_run:
-        print(f"\n🔍 DRY RUN MODE - No files will be modified")
-        print(f"\nProcessing would include:")
-        print(f"  • Copy files to new 'processed_PATCHNAME' folders")
-        print(f"  • Silence removal and trimming (threshold: {SILENCE_THRESHOLD_DB} dB)")
-        print(f"  • Fade in/out application ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
-        print(f"  • Patch-wide normalization to {TARGET_PEAK_DB} dB")
-        print("\nRun without --dry-run to actually process the files.")
-        return
-    
     # Confirm processing
     total_patches = len(patches_to_process)
-    print(f"\n⚡ This will process {total_patches} patch folder(s) and create new 'processed_PATCHNAME' folders.")
+    print(f"\n⚡ This will process {total_patches} patch folder(s) and create '_processed' directory.")
     print("Original files will remain untouched.")
-    response = input("Continue? (y/N): ").strip().lower()
+    print(f"\nProcessing will include:")
+    print(f"  • Copy files to '_processed/PATCHNAME' folders")
+    print(f"  • Step 1: Convert to 16-bit if needed")
+    print(f"  • Step 2: Remove silence from beginning/end (threshold: {SILENCE_THRESHOLD_DB} dB)")
+    print(f"  • Step 3: Normalize each sample to {TARGET_PEAK_DB} dB peak")
+    print(f"  • Step 4: Remove quiet start until {QUIET_START_THRESHOLD_DB} dB threshold")
+    print(f"  • Step 5: Apply fade in/out ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
+    print(f"  • Step 6: Analyze quality (clipping, DC offset, length consistency)")
+    
+    response = input("\nContinue? (y/N): ").strip().lower()
     if response not in ['y', 'yes']:
         print("Processing cancelled.")
         sys.exit(0)
@@ -205,14 +202,8 @@ Processed files will be saved to new folders:
             patch_name = os.path.basename(patch_folder)
             print(f"\n[{i}/{total_patches}] Processing: {patch_name}")
             
-            # Use the new non-destructive processing method
-            success = process_single_patch(
-                patch_folder=patch_folder,
-                sample_rate=SAMPLE_RATE,
-                target_peak_db=TARGET_PEAK_DB,
-                fade_in_ms=FADE_IN_MS,
-                fade_out_ms=FADE_OUT_MS
-            )
+            # Use the new simplified processing method
+            success = process_single_patch(patch_folder=patch_folder)
             
             if success:
                 success_count += 1

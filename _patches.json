@@ -588,7 +588,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Synbass",
     "program_change": 62,
     "from_note": 24,
@@ -602,7 +602,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Kalimba",
     "program_change": 63,
     "from_note": 12,
