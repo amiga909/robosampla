@@ -9,6 +9,7 @@ import argparse
 import glob
 import shutil
 import json
+import subprocess
 
 # Add parent directory to path to import config and modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -186,191 +187,111 @@ def load_plugin_universal(plugin_identifier):
         return None
 
 
-def save_plugin_preset(plugin, preset_name, preset_type="json"):
-    """Save plugin preset using different methods from GitHub issue #187."""
+def save_default_preset(plugin):
+    """Save plugin's current settings as the default preset."""
     try:
-        preset_dir = os.path.join(os.path.dirname(__file__), "presets" if preset_type == "json" else "raw_presets")
+        if not hasattr(plugin, 'name'):
+            print(f"  ❌ Plugin has no name attribute")
+            return False
+            
+        plugin_name = plugin.name.replace(' ', '_').replace('/', '_')  # Clean name for filename
+        preset_dir = os.path.join(os.path.dirname(__file__), "default_presets")
         os.makedirs(preset_dir, exist_ok=True)
         
-        if preset_type == "json":
-            # Method from GitHub discussion: Save parameter values as JSON
-            if hasattr(plugin, 'parameters') and plugin.parameters:
-                param_value_dict = {parameter_name: getattr(plugin, parameter_name) 
-                                  for parameter_name in plugin.parameters.keys()}
-                
-                # Handle WrappedBool objects (from GitHub discussion)
+        # Save as binary state if available (more complete)
+        if hasattr(plugin, 'raw_state'):
+            preset_file = os.path.join(preset_dir, f"{plugin_name}_default.bin")
+            with open(preset_file, 'wb') as f:
+                f.write(plugin.raw_state)
+            print(f"  ✅ Saved default preset (binary): {plugin_name}")
+            return True
+            
+        # Fallback to JSON parameters
+        elif hasattr(plugin, 'parameters') and plugin.parameters:
+            param_value_dict = {parameter_name: getattr(plugin, parameter_name) 
+                              for parameter_name in plugin.parameters.keys()}
+            
+            # Handle WrappedBool objects
+            try:
+                from pedalboard._pedalboard import WrappedBool
+                param_value_dict = {k: (bool(v) if isinstance(v, WrappedBool) else v) 
+                                  for k, v in param_value_dict.items()}
+            except ImportError:
                 try:
-                    from pedalboard._pedalboard import WrappedBool
+                    from pedalboard.pedalboard import WrappedBool
                     param_value_dict = {k: (bool(v) if isinstance(v, WrappedBool) else v) 
                                       for k, v in param_value_dict.items()}
                 except ImportError:
-                    # Fallback for older pedalboard versions
-                    try:
-                        from pedalboard.pedalboard import WrappedBool
-                        param_value_dict = {k: (bool(v) if isinstance(v, WrappedBool) else v) 
-                                          for k, v in param_value_dict.items()}
-                    except ImportError:
-                        pass  # No WrappedBool handling needed
-                
-                preset_file = os.path.join(preset_dir, f"{preset_name}.json")
-                with open(preset_file, 'w') as f:
-                    json.dump(param_value_dict, f, indent=2)
-                
-                print(f"  ✅ Saved JSON preset: {preset_name}")
-                return True
-            else:
-                print(f"  ❌ Plugin has no parameters to save")
-                return False
-                
-        elif preset_type == "binary":
-            # Method from GitHub #297: Save raw_state as binary
-            if hasattr(plugin, 'raw_state'):
-                preset_file = os.path.join(preset_dir, f"{preset_name}.bin")
-                with open(preset_file, 'wb') as f:
-                    f.write(plugin.raw_state)
-                
-                print(f"  ✅ Saved binary preset: {preset_name}")
-                return True
-            else:
-                print(f"  ❌ Plugin doesn't support raw_state")
-                return False
+                    pass
+            
+            preset_file = os.path.join(preset_dir, f"{plugin_name}_default.json")
+            with open(preset_file, 'w') as f:
+                json.dump(param_value_dict, f, indent=2)
+            print(f"  ✅ Saved default preset (JSON): {plugin_name}")
+            return True
+        else:
+            print(f"  ❌ Plugin has no saveable state")
+            return False
         
     except Exception as e:
-        print(f"  ❌ Error saving preset: {e}")
+        print(f"  ❌ Error saving default preset: {e}")
         return False
 
 
-def load_plugin_preset(plugin, preset_name):
-    """Load plugin preset using different methods from GitHub issue #187."""
+def load_default_preset(plugin):
+    """Load plugin's default preset if it exists."""
     try:
-        if preset_name.startswith("VST Preset: "):
-            # External .vstpreset file
-            actual_preset_name = preset_name.replace("VST Preset: ", "")
-            preset_file_name = actual_preset_name + ".vstpreset"
-            
-            preset_dirs = [
-                os.path.expanduser("~/Library/Audio/Presets"),
-                "/Library/Audio/Presets",
-                os.path.expanduser("~/Documents/VST3 Presets"),
-                "/Library/Application Support/VST3 Presets"
-            ]
-            
-            for preset_dir in preset_dirs:
-                if os.path.exists(preset_dir):
-                    for root, dirs, files in os.walk(preset_dir):
-                        if preset_file_name in files:
-                            preset_path = os.path.join(root, preset_file_name)
-                            if hasattr(plugin, 'load_preset'):
-                                plugin.load_preset(preset_path)
-                                print(f"    ✅ Loaded VST preset: {actual_preset_name}")
-                                return True
-            
-            print(f"    ❌ VST preset file not found: {preset_file_name}")
+        if not hasattr(plugin, 'name'):
             return False
             
-        elif preset_name.startswith("JSON Preset: "):
-            # JSON parameter preset
-            actual_preset_name = preset_name.replace("JSON Preset: ", "")
-            preset_dir = os.path.join(os.path.dirname(__file__), "presets")
-            preset_file = os.path.join(preset_dir, f"{actual_preset_name}.json")
+        plugin_name = plugin.name.replace(' ', '_').replace('/', '_')
+        preset_dir = os.path.join(os.path.dirname(__file__), "default_presets")
+        
+        # Try binary preset first
+        bin_preset_file = os.path.join(preset_dir, f"{plugin_name}_default.bin")
+        if os.path.exists(bin_preset_file) and hasattr(plugin, 'raw_state'):
+            with open(bin_preset_file, 'rb') as f:
+                plugin.raw_state = f.read()
+            print(f"    ✅ Loaded default preset (binary): {plugin_name}")
+            return True
+        
+        # Try JSON preset
+        json_preset_file = os.path.join(preset_dir, f"{plugin_name}_default.json")
+        if os.path.exists(json_preset_file):
+            with open(json_preset_file, 'r') as f:
+                param_value_dict = json.load(f)
             
-            if os.path.exists(preset_file):
-                with open(preset_file, 'r') as f:
-                    param_value_dict = json.load(f)
-                
-                # Apply parameters
-                for parameter_name, serialized_value in param_value_dict.items():
-                    if hasattr(plugin, parameter_name):
-                        setattr(plugin, parameter_name, serialized_value)
-                
-                print(f"    ✅ Loaded JSON preset: {actual_preset_name}")
-                return True
-            else:
-                print(f"    ❌ JSON preset file not found: {preset_file}")
-                return False
-                
-        elif preset_name.startswith("Binary Preset: "):
-            # Binary raw_state preset
-            actual_preset_name = preset_name.replace("Binary Preset: ", "")
-            preset_dir = os.path.join(os.path.dirname(__file__), "raw_presets")
-            preset_file = os.path.join(preset_dir, f"{actual_preset_name}.bin")
+            for parameter_name, serialized_value in param_value_dict.items():
+                if hasattr(plugin, parameter_name):
+                    setattr(plugin, parameter_name, serialized_value)
             
-            if os.path.exists(preset_file) and hasattr(plugin, 'raw_state'):
-                with open(preset_file, 'rb') as f:
-                    plugin.raw_state = f.read()
-                
-                print(f"    ✅ Loaded binary preset: {actual_preset_name}")
-                return True
-            else:
-                print(f"    ❌ Binary preset file not found or plugin doesn't support raw_state: {preset_file}")
-                return False
+            print(f"    ✅ Loaded default preset (JSON): {plugin_name}")
+            return True
         
         return False
         
     except Exception as e:
-        print(f"    ❌ Error loading preset '{preset_name}': {e}")
+        print(f"    ❌ Error loading default preset: {e}")
         return False
 
 
-def get_plugin_presets(plugin):
-    """Get available presets for a plugin using multiple methods from GitHub issue #187."""
-    try:
-        presets = []
-        
-        # Method 1: Check for external .vstpreset files (VST3 plugins)
-        if hasattr(plugin, 'load_preset'):
-            preset_dirs = [
-                os.path.expanduser("~/Library/Audio/Presets"),
-                "/Library/Audio/Presets",
-                os.path.expanduser("~/Documents/VST3 Presets"),
-                "/Library/Application Support/VST3 Presets"
-            ]
-            
-            for preset_dir in preset_dirs:
-                if os.path.exists(preset_dir):
-                    for root, dirs, files in os.walk(preset_dir):
-                        for file in files:
-                            if file.endswith('.vstpreset'):
-                                preset_path = os.path.join(root, file)
-                                preset_name = os.path.splitext(file)[0]
-                                presets.append(f"VST Preset: {preset_name}")
-        
-        # Method 2: Check for saved parameter JSON files (from GitHub discussion)
-        json_preset_dir = os.path.join(os.path.dirname(__file__), "presets")
-        if os.path.exists(json_preset_dir):
-            for file in os.listdir(json_preset_dir):
-                if file.endswith('.json'):
-                    preset_name = os.path.splitext(file)[0]
-                    presets.append(f"JSON Preset: {preset_name}")
-        
-        # Method 3: Check for saved raw state files (binary presets - from GitHub #297)
-        if hasattr(plugin, 'raw_state'):
-            state_preset_dir = os.path.join(os.path.dirname(__file__), "raw_presets")
-            if os.path.exists(state_preset_dir):
-                for file in os.listdir(state_preset_dir):
-                    if file.endswith('.bin'):
-                        preset_name = os.path.splitext(file)[0]
-                        presets.append(f"Binary Preset: {preset_name}")
-        
-        return presets
-    except Exception as e:
-        print(f"Error getting presets: {e}")
-        return []
+def get_plugin_folder_name(plugin):
+    """Get clean folder name for plugin."""
+    if hasattr(plugin, 'name'):
+        # Clean plugin name for use as folder name
+        plugin_name = plugin.name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+        return f"_{plugin_name}"
+    else:
+        return "_plugin"
 
 
-def apply_plugin_to_file(input_file, output_file, plugin, preset_name=None, sample_rate=44100):
+def apply_plugin_to_file(input_file, output_file, plugin, sample_rate=44100):
     """Apply plugin to a single audio file."""
     try:
         # Load the audio file
         with AudioFile(input_file) as f:
             audio = f.read(f.frames)
             original_sample_rate = f.samplerate
-        
-        # Apply preset if specified using new preset system
-        if preset_name:
-            success = load_plugin_preset(plugin, preset_name)
-            if not success:
-                print(f"    Warning: Failed to apply preset '{preset_name}', using default settings")
         
         # Create pedalboard with the plugin
         board = Pedalboard([plugin])
@@ -390,7 +311,7 @@ def apply_plugin_to_file(input_file, output_file, plugin, preset_name=None, samp
         return False
 
 
-def process_patch_with_plugin(patch_folder, plugin, preset_name=None, output_suffix="_fx"):
+def process_patch_with_plugin(patch_folder, plugin):
     """Process all WAV files in a patch folder with AU/VST plugin."""
     patch_name = os.path.basename(patch_folder)
     
@@ -400,11 +321,32 @@ def process_patch_with_plugin(patch_folder, plugin, preset_name=None, output_suf
         print(f"  Warning: No WAV files found in {patch_name}")
         return False
     
-    # Create output directory
+    # Create _plugins directory in the same parent directory as the input patch
     parent_dir = os.path.dirname(patch_folder)
-    output_patch_folder = os.path.join(parent_dir, f"{patch_name}{output_suffix}")
+    plugins_dir = os.path.join(parent_dir, "_plugins")
+    os.makedirs(plugins_dir, exist_ok=True)
+    
+    plugin_suffix = get_plugin_folder_name(plugin)
+    
+    # Check if folder already has this plugin suffix to avoid duplicates like slamlow_FuzzPlus3_FuzzPlus3
+    if patch_name.endswith(plugin_suffix):
+        # Folder already has this plugin suffix, use same name
+        output_folder_name = patch_name
+        print(f"  Re-processing existing plugin folder: {patch_name}")
+    else:
+        # Create new folder name with plugin suffix
+        output_folder_name = f"{patch_name}{plugin_suffix}"
+        print(f"  Processing with plugin suffix: {plugin_suffix}")
+    
+    output_patch_folder = os.path.join(plugins_dir, output_folder_name)
+    
+    # Remove existing folder if it exists (overwrite)
+    if os.path.exists(output_patch_folder):
+        shutil.rmtree(output_patch_folder)
+        print(f"  Removed existing folder: _plugins/{output_folder_name}")
+    
     os.makedirs(output_patch_folder, exist_ok=True)
-    print(f"  Created output folder: {patch_name}{output_suffix}")
+    print(f"  Created output folder: _plugins/{output_folder_name}")
     
     success_count = 0
     total_files = len(wav_files)
@@ -414,16 +356,18 @@ def process_patch_with_plugin(patch_folder, plugin, preset_name=None, output_suf
         filename = os.path.basename(wav_file)
         output_file = os.path.join(output_patch_folder, filename)
         
-        success = apply_plugin_to_file(wav_file, output_file, plugin, preset_name)
+        success = apply_plugin_to_file(wav_file, output_file, plugin)
         if success:
             success_count += 1
     
     print(f"  Processed {success_count}/{total_files} files successfully")
-    return success_count > 0
+    
+    # Return both success status and the output folder path
+    return (success_count > 0, output_patch_folder)
 
 
 def interactive_plugin_selection():
-    """Interactive CLI for selecting AU or VST plugin and preset."""
+    """Interactive CLI for selecting AU or VST plugin with simplified preset handling."""
     print("\n" + "="*60)
     print("PLUGIN SELECTION (AU & VST)")
     print("="*60)
@@ -437,7 +381,7 @@ def interactive_plugin_selection():
         print("  • /Library/Audio/Plug-Ins/Components (AU)")
         print("  • /Library/Audio/Plug-Ins/VST3 (VST3)")
         print("  • /Library/Audio/Plug-Ins/VST (VST2)")
-        return None, None
+        return None
     
     print(f"\nAvailable plugins (AU prioritized):")
     for i, (plugin_name, plugin_path) in enumerate(plugins, 1):
@@ -448,7 +392,7 @@ def interactive_plugin_selection():
         try:
             choice = input(f"\nSelect plugin (1-{len(plugins)}) or 'q' to quit: ").strip()
             if choice.lower() == 'q':
-                return None, None
+                return None
             
             choice_num = int(choice)
             
@@ -469,83 +413,80 @@ def interactive_plugin_selection():
     if not plugin:
         print("Failed to load plugin.")
         print("Make sure the plugin path is correct and the plugin is installed.")
-        return None, None
+        return None
     
-    # Offer to show plugin editor for parameter adjustment
+    # Try to load default preset if it exists
+    preset_loaded = load_default_preset(plugin)
+    if not preset_loaded:
+        print("    No default preset found, using factory settings")
+    
+    # Ask if user wants to adjust settings
     if hasattr(plugin, 'show_editor'):
-        show_editor = input(f"\nWould you like to open the plugin editor to adjust parameters? (y/N): ").strip().lower()
-        if show_editor in ['y', 'yes']:
+        adjust_settings = input(f"\nWould you like to adjust plugin settings? (y/N): ").strip().lower()
+        if adjust_settings in ['y', 'yes']:
             print("Opening plugin editor... Close the editor window when you're done adjusting parameters.")
             try:
                 plugin.show_editor()
                 print("Plugin editor closed.")
                 
-                # Read out current parameter values
+                # Show current parameter values
                 if hasattr(plugin, 'parameters') and plugin.parameters:
-                    print(f"\nCurrent parameter values for {selected_plugin_name}:")
+                    print(f"\nCurrent parameter values:")
                     param_value_dict = {parameter_name: getattr(plugin, parameter_name) 
                                       for parameter_name in plugin.parameters.keys()}
                     for param_name, param_value in param_value_dict.items():
                         print(f"  {param_name}: {param_value}")
                 
-                # Offer to save the current settings as a preset
-                save_preset = input(f"\nWould you like to save these settings as a preset? (y/N): ").strip().lower()
-                if save_preset in ['y', 'yes']:
-                    preset_name = input("Enter preset name: ").strip()
-                    if preset_name:
-                        # Choose preset type based on plugin capabilities
-                        if hasattr(plugin, 'raw_state'):
-                            print("\nChoose preset format:")
-                            print("  1. JSON (parameters only, human-readable)")
-                            print("  2. Binary (complete plugin state, includes UI state)")
-                            
-                            format_choice = input("Select format (1-2): ").strip()
-                            preset_type = "binary" if format_choice == "2" else "json"
-                        else:
-                            preset_type = "json"
-                        
-                        save_plugin_preset(plugin, preset_name, preset_type)
+                # Ask if user wants to save these settings as default
+                save_default = input(f"\nSave these settings as default for future use? (y/N): ").strip().lower()
+                if save_default in ['y', 'yes']:
+                    save_default_preset(plugin)
                         
             except Exception as e:
                 print(f"Error opening plugin editor: {e}")
-                print("Continuing with default parameter values...")
+                print("Continuing with current settings...")
     
-    # Check for presets
-    presets = get_plugin_presets(plugin)
-    selected_preset = None
-    
-    if presets:
-        print(f"\nFound {len(presets)} presets for {selected_plugin_name}:")
-        print("  0. No preset (use default settings)")
-        for i, preset_name in enumerate(presets, 1):
-            print(f"  {i}. {preset_name}")
+    return plugin
+
+
+def run_process_audio_on_folder(plugin_folder):
+    """Run process_audio.py on a plugin-processed folder."""
+    try:
+        # Get the path to process_audio.py (should be in utils directory)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        process_audio_script = os.path.join(script_dir, "process_audio.py")
         
-        while True:
-            try:
-                choice = input(f"\nSelect preset (0-{len(presets)}) or 'q' to quit: ").strip()
-                if choice.lower() == 'q':
-                    return None, None
-                
-                preset_index = int(choice)
-                if preset_index == 0:
-                    selected_preset = None
-                    break
-                elif 1 <= preset_index <= len(presets):
-                    selected_preset = presets[preset_index - 1]
-                    break
-                else:
-                    print(f"Please enter a number between 0 and {len(presets)}")
-            except ValueError:
-                print("Please enter a valid number or 'q'")
-    else:
-        print(f"\nNo presets available for {selected_plugin_name}")
-        selected_preset = None
-    
-    return plugin, selected_preset
+        if not os.path.exists(process_audio_script):
+            print(f"    ❌ process_audio.py not found at {process_audio_script}")
+            return False
+        
+        folder_name = os.path.basename(plugin_folder)
+        print(f"    🎵 Running process_audio.py on {folder_name}...")
+        
+        # Run process_audio.py with the plugin folder as input and --yes flag to skip prompts
+        # Change to the parent directory (project root) for proper imports
+        project_root = os.path.dirname(script_dir)
+        cmd = [sys.executable, process_audio_script, plugin_folder, "--yes"]
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=project_root)
+        
+        if result.returncode == 0:
+            print(f"    ✅ Audio processing completed successfully")
+            return True
+        else:
+            print(f"    ❌ Audio processing failed:")
+            if result.stderr:
+                print(f"        Error: {result.stderr.strip()}")
+            if result.stdout:
+                print(f"        Output: {result.stdout.strip()}")
+            return False
+            
+    except Exception as e:
+        print(f"    ❌ Error running process_audio.py: {e}")
+        return False
 
 
 def find_processed_folders(root_folder):
-    """Find processed patch folders."""
+    """Find processed patch folders in both _processed and _plugins directories."""
     processed_folders = []
     
     # Look for _processed directory
@@ -553,6 +494,17 @@ def find_processed_folders(root_folder):
     if os.path.exists(processed_dir):
         for item in os.listdir(processed_dir):
             item_path = os.path.join(processed_dir, item)
+            if os.path.isdir(item_path):
+                # Check if folder contains WAV files
+                wav_files = glob.glob(os.path.join(item_path, "*.wav"))
+                if wav_files:
+                    processed_folders.append(item_path)
+    
+    # Also look for _plugins directory (for re-processing plugin folders)
+    plugins_dir = os.path.join(root_folder, "_plugins")
+    if os.path.exists(plugins_dir):
+        for item in os.listdir(plugins_dir):
+            item_path = os.path.join(plugins_dir, item)
             if os.path.isdir(item_path):
                 # Check if folder contains WAV files
                 wav_files = glob.glob(os.path.join(item_path, "*.wav"))
@@ -569,9 +521,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
 Examples:
-  python utils/process_au_plugin.py                              # Process all patches in _processed
-  python utils/process_au_plugin.py _output                     # Process all patches in _output/_processed
-  python utils/process_au_plugin.py _output/_processed/House!   # Process specific patch folder
+  python utils/process_plugins.py                               # Process all patches in _processed
+  python utils/process_plugins.py _output                      # Process all patches in _output/_processed
+  python utils/process_plugins.py _output/_processed/House!    # Process specific patch folder
 
 This tool processes audio files that have already been processed by process_audio.py
 It looks for folders in '_processed' directories and applies AU or VST plugins to them.
@@ -585,14 +537,23 @@ Expected structure:
       └── Patch2/
           └── sample1.wav     (processed audio)
 
-Output structure:
+Output structure (using FuzzPlus3 plugin as example):
   _output/
-  └── _processed/
-      ├── Patch1_fx/
-      │   ├── sample1.wav     (Plugin processed)
-      │   └── sample2.wav     (Plugin processed)
-      └── Patch2_fx/
-          └── sample1.wav     (Plugin processed)
+  ├── _processed/
+  │   ├── Patch1/             (original processed audio)
+  │   └── Patch2/             (original processed audio)
+  ├── _plugins/               (plugin effects from _processed folder)
+  │   ├── Patch1_FuzzPlus3/
+  │   └── Patch2_FuzzPlus3/
+  └── other_folders...
+
+  If processing from a specific folder:
+  some_folder/
+  ├── patch_files...
+  └── _plugins/               (plugin effects created here)
+      └── folder_name_FuzzPlus3/
+
+Note: Plugin folders are created in '_plugins' directory alongside the source folder. Existing folders will be overwritten.
         """
     )
     
@@ -602,11 +563,8 @@ Output structure:
     parser.add_argument('--plugin', type=str,
                        help='Plugin path or name (skip interactive selection)')
     
-    parser.add_argument('--preset', type=str,
-                       help='Preset name to use with the plugin')
-    
-    parser.add_argument('--suffix', type=str, default='_fx',
-                       help='Suffix for output folders (default: _fx)')
+    parser.add_argument('--skip-audio-processing', action='store_true',
+                       help='Skip running process_audio.py on plugin folders')
     
     args = parser.parse_args()
     
@@ -638,6 +596,7 @@ Output structure:
         else:
             print(f"Error: No processed patch folders with WAV files found in '{args.folder}'")
             print("Have you run process_audio.py first to create '_processed' folders?")
+            print("Or use folders from '_plugins' directory to re-process plugin effects.")
         sys.exit(1)
     
     # Plugin selection
@@ -647,13 +606,12 @@ Output structure:
         if not plugin:
             print(f"Error: Could not load plugin '{args.plugin}'")
             sys.exit(1)
-        selected_preset = args.preset
+        # Try to load default preset
+        load_default_preset(plugin)
         print(f"Using plugin: {args.plugin}")
-        if selected_preset:
-            print(f"Using preset: {selected_preset}")
     else:
         # Interactive plugin selection
-        plugin, selected_preset = interactive_plugin_selection()
+        plugin = interactive_plugin_selection()
         if not plugin:
             print("No plugin selected. Exiting.")
             sys.exit(0)
@@ -666,9 +624,8 @@ Output structure:
     print(f"Base folder: {args.folder}")
     print(f"Patches found: {len(patches_to_process)}")
     print(f"Plugin: {plugin}")
-    if selected_preset:
-        print(f"Preset: {selected_preset}")
-    print(f"Output suffix: {args.suffix}")
+    plugin_suffix = get_plugin_folder_name(plugin)
+    print(f"Output suffix: {plugin_suffix}")
     
     # List patches
     print(f"\nProcessed patches to enhance:")
@@ -681,7 +638,13 @@ Output structure:
     total_patches = len(patches_to_process)
     print(f"\n⚡ This will apply plugin to {total_patches} processed patch folder(s).")
     print("Original processed files will remain untouched.")
-    print(f"\nProcessing will create new folders with '{args.suffix}' suffix.")
+    print(f"\nProcessing will create new folders in '_plugins' directory with '{plugin_suffix}' suffix.")
+    print("⚠️  Existing plugin folders in '_plugins' will be overwritten!")
+    
+    if not args.skip_audio_processing:
+        print(f"\n🎵 After plugin processing, process_audio.py will be run on each folder.")
+    else:
+        print(f"\n⏭️  Audio processing will be skipped (--skip-audio-processing)")
     
     response = input("\nContinue? (y/N): ").strip().lower()
     if response not in ['y', 'yes']:
@@ -695,25 +658,48 @@ Output structure:
     
     success_count = 0
     failed_patches = []
+    plugin_folders_created = []
     
     try:
         for i, patch_folder in enumerate(patches_to_process, 1):
             patch_name = os.path.basename(patch_folder)
             print(f"\n[{i}/{total_patches}] Processing: {patch_name}")
             
-            success = process_patch_with_plugin(
+            success, output_folder = process_patch_with_plugin(
                 patch_folder=patch_folder,
-                plugin=plugin,
-                preset_name=selected_preset,
-                output_suffix=args.suffix
+                plugin=plugin
             )
             
             if success:
                 success_count += 1
-                print(f"  ✅ {patch_name} completed successfully")
+                print(f"  ✅ {patch_name} plugin processing completed successfully")
+                
+                # Use the actual output folder path returned by the function
+                plugin_folders_created.append(output_folder)
             else:
                 failed_patches.append(patch_name)
-                print(f"  ❌ {patch_name} failed")
+                print(f"  ❌ {patch_name} plugin processing failed")
+        
+        # Run process_audio.py on successfully created plugin folders (unless skipped)
+        audio_success_count = 0
+        audio_failed_folders = []
+        
+        if plugin_folders_created and not args.skip_audio_processing:
+            print(f"\n" + "-"*60)
+            print(f"RUNNING AUDIO PROCESSING ON PLUGIN FOLDERS...")
+            print("-"*60)
+            
+            for j, plugin_folder in enumerate(plugin_folders_created, 1):
+                folder_name = os.path.basename(plugin_folder)
+                print(f"\n[{j}/{len(plugin_folders_created)}] Audio processing: {folder_name}")
+                
+                audio_success = run_process_audio_on_folder(plugin_folder)
+                if audio_success:
+                    audio_success_count += 1
+                else:
+                    audio_failed_folders.append(folder_name)
+        elif plugin_folders_created and args.skip_audio_processing:
+            print(f"\n⏭️  Skipping audio processing as requested")
         
         # Final summary
         print("\n" + "="*60)
@@ -723,13 +709,28 @@ Output structure:
             print("⚠️  PLUGIN PROCESSING COMPLETED WITH SOME FAILURES")
         print("="*60)
         print(f"Total patches: {total_patches}")
-        print(f"Successful: {success_count}")
-        print(f"Failed: {len(failed_patches)}")
+        print(f"Plugin processing successful: {success_count}")
+        print(f"Plugin processing failed: {len(failed_patches)}")
+        
+        if plugin_folders_created and not args.skip_audio_processing:
+            print(f"Audio processing successful: {audio_success_count}")
+            print(f"Audio processing failed: {len(audio_failed_folders)}")
+        elif args.skip_audio_processing:
+            print(f"Audio processing: skipped")
         
         if failed_patches:
-            print(f"\nFailed patches:")
+            print(f"\nFailed plugin processing:")
             for patch_name in failed_patches:
                 print(f"  • {patch_name}")
+        
+        if plugin_folders_created and not args.skip_audio_processing and audio_failed_folders:
+            print(f"\nFailed audio processing:")
+            for folder_name in audio_failed_folders:
+                print(f"  • {folder_name}")
+        
+        # Exit with error if there were failures
+        has_audio_failures = not args.skip_audio_processing and plugin_folders_created and audio_failed_folders
+        if failed_patches or has_audio_failures:
             sys.exit(1)
             
     except KeyboardInterrupt:

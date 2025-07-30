@@ -2,7 +2,6 @@
 MIDI utility functions for sending MIDI messages.
 """
 import mido
-import time
 
 
 def send_note_on(outport, note, velocity=100, channel=0):
@@ -31,6 +30,12 @@ def send_bank_select(outport, bank_msb, bank_lsb, channel=0):
     # Send Bank Select LSB (CC 32)
     lsb_msg = mido.Message('control_change', control=32, value=bank_lsb, channel=channel)
     outport.send(lsb_msg)
+
+
+def send_control_change(outport, control, value, channel=0):
+    """Send a MIDI control change message."""
+    msg = mido.Message('control_change', control=control, value=value, channel=channel)
+    outport.send(msg)
 
 
 def list_midi_ports():

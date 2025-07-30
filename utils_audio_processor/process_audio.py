@@ -121,6 +121,9 @@ Processed files will be saved to new folders:
     parser.add_argument('folder', nargs='?', default=OUTPUT_DIR,
                        help=f'Path to folder containing patches, or specific patch folder (default: {OUTPUT_DIR})')
     
+    parser.add_argument('--yes', '-y', action='store_true',
+                       help='Automatically answer yes to all prompts (non-interactive mode)')
+    
     args = parser.parse_args()
     
     # Validate folder path
@@ -185,10 +188,14 @@ Processed files will be saved to new folders:
     print(f"  • Step 5: Apply fade in/out ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
     print(f"  • Step 6: Analyze quality (clipping, DC offset, length consistency)")
     
-    response = input("\nContinue? (y/N): ").strip().lower()
-    if response not in ['y', 'yes']:
-        print("Processing cancelled.")
-        sys.exit(0)
+    # Skip confirmation if --yes flag is used
+    if not args.yes:
+        response = input("\nContinue? (y/N): ").strip().lower()
+        if response not in ['y', 'yes']:
+            print("Processing cancelled.")
+            sys.exit(0)
+    else:
+        print("\n--yes flag detected: Continuing automatically...")
     
     # Process all patches
     print("\n" + "-"*60)

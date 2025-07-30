@@ -26,11 +26,22 @@ def apply_drum_mapping(patch, drum_mappings):
     """Apply drum mapping to a patch if it has a type field."""
     if 'type' in patch and patch['type'] in drum_mappings:
         mapping = drum_mappings[patch['type']]
-        if 'notes' in mapping:
-            patch['notes'] = mapping['notes']
-            print(f"Applied {patch['type']} drum mapping: {len(patch['notes'])} notes")
+        
+        # Handle special airbaseSynth type
+        if patch['type'] == 'airbaseSynth':
+            # Set up airbaseSynth specific parameters
+            patch['trigger_note'] = mapping.get('trigger_note', 36)
+            patch['control_cc'] = mapping.get('control_cc', 101)
+            patch['cc_to_note_mapping'] = mapping.get('cc_to_note_mapping', {})
+            patch['notes'] = mapping.get('notes', {})
+            print(f"Applied {patch['type']} synth mapping: trigger note {patch['trigger_note']}, CC {patch['control_cc']}, {len(patch['notes'])} notes")
         else:
-            print(f"Warning: No notes found in {patch['type']} mapping")
+            # Handle regular drum mappings
+            if 'notes' in mapping:
+                patch['notes'] = mapping['notes']
+                print(f"Applied {patch['type']} drum mapping: {len(patch['notes'])} notes")
+            else:
+                print(f"Warning: No notes found in {patch['type']} mapping")
     return patch
 
 

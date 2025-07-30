@@ -588,7 +588,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Synbass",
     "program_change": 62,
     "from_note": 24,

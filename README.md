@@ -10,15 +10,12 @@ An automated tool for sampling synthesizers by playing MIDI notes and recording 
 # Commands
 
 - `caffeinate -di python main.py` // use caffeinate on mac to keep recording going
-- then: `python utils/process_audio` // manually for now
-
-Utils:
 
 - `python utils/program_change.py 69` // tests a PC and sends low and high notes to configure the JSON
-- `python utils/test_patches.py` // send some musical notes to hear the generated patch
-- python utils/setup.py
+- `python utils/setup.py` used in other scripts to setup local_config.json
 
-- caffeinate -di python main.py
+- `python utils_audio_processor/process_audio`  
+  => currently moved to REAPER batch processor!
 
 ## File Structure
 

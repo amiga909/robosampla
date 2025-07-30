@@ -7,12 +7,15 @@ import mido
 
 from midi_utils import (
     send_note_on, send_note_off, send_program_change, 
-    send_bank_select, midi_note_to_name
+    send_bank_select, send_control_change, midi_note_to_name
 )
 from audio_utils import get_device_channels, save_audio
 from patch_utils import safe_filename, create_patch_folder, save_patches
 #from audio_processor import process_recorded_sample, process_patch_folder
-from config import SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB  # UNPROCESSED_FOLDER removed
+from config import (
+    SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, TARGET_PEAK_DB, 
+    SAMPLE_RATE, DEFAULT_VELOCITY
+)
 import sounddevice as sd
 import numpy as np
 
@@ -56,9 +59,9 @@ def check_for_clipping(audio_data, filename, patch_name=None, clipping_threshold
         return False
 
 
-def record_and_process_note(outport, note, patch, patch_folder, sample_rate, audio_device, filename):
+def record_and_process_note(outport, note, patch, patch_folder, sample_rate, audio_device, filename, cc_value=None):
     """
-    Record and process a single note  
+    Record and process a single note. Supports both regular notes and airbaseSynth.
     
     Args:
         outport: MIDI output port
@@ -68,8 +71,12 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
         sample_rate: audio sample rate
         audio_device: audio device for recording
         filename: filename for the recorded sample (without .wav extension)
+        cc_value: Optional CC value for airbaseSynth (if provided, sends CC before note)
     """
-    print(f'Playing note: {note} ({filename})')
+    if cc_value is not None:
+        print(f'Playing airbaseSynth: CC={cc_value} -> note {note} ({filename})')
+    else:
+        print(f'Playing note: {note} ({filename})')
 
     RECORD_START_BUFFER = 0.5  # Buffer time before recording starts (to ensure MIDI is sent)
     # Calculate total recording time (note duration + note_gap)
@@ -99,6 +106,14 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
         # always have silence before
         time.sleep(RECORD_START_BUFFER)
         
+        # Send CC message first if this is airbaseSynth
+        if cc_value is not None:
+            control_cc = patch.get('control_cc', 101)
+            send_control_change(outport, control_cc, cc_value, patch['midi_channel'])
+            print(f"  🎛️  Sent CC {control_cc} = {cc_value} on channel {patch['midi_channel']}")
+            # Airbase synth needs more time to process CC messages
+            time.sleep(0.5)
+        
         # Send MIDI note ON
         print(f"  🎹 Sending MIDI Note ON: {note} vel={patch['velocity']} ch={patch['midi_channel']}")
         send_note_on(outport, note, patch['velocity'], patch['midi_channel'])
@@ -118,8 +133,19 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
             time.sleep(remaining_time)
         
         print(f"  ✅ Recording time completed")
-        sd.stop()  # Stop current recording stream
-        time.sleep(0.1)
+        
+        # Improved audio cleanup for stability
+        try:
+            sd.stop()  # Stop current recording stream
+            time.sleep(0.2)  # Give more time for cleanup
+            
+            # Force garbage collection to free audio buffers
+            import gc
+            gc.collect()
+            time.sleep(0.1)
+        except Exception as cleanup_error:
+            print(f"  ⚠️  Audio cleanup warning: {cleanup_error}")
+        
         # Check for clipping in the recorded audio
         wav_filename = f"{filename}.wav"
         check_for_clipping(recording, wav_filename, patch['name'])
@@ -129,21 +155,19 @@ def record_and_process_note(outport, note, patch, patch_folder, sample_rate, aud
         shape = save_audio(recording, filepath, sample_rate)
         print(f"  Saved: {filepath} ({shape})")
         
-        # Small delay before next note
-        time.sleep(0.1)
+        # Longer delay for airbaseSynth to prevent hangs
+        if cc_value is not None:
+            time.sleep(0.3)  # Extra time for airbaseSynth cleanup
+        else:
+            time.sleep(0.1)  # Small delay before next note for regular patches
         return True
         
     except Exception as e:
-        print(f"  ❌ ERROR recording note {note}: {e}")
+        if cc_value is not None:
+            print(f"  ❌ ERROR recording airbaseSynth (CC={cc_value}): {e}")
+        else:
+            print(f"  ❌ ERROR recording note {note}: {e}")
         
-        # Try emergency reset on any error
-        try:
-            emergency_audio_reset()
-        except:
-            pass
-        
-        return False
-
 
 def check_sample_lengths(patch_folder, patch_name, min_ratio=0.3):
     """
@@ -255,7 +279,28 @@ def play_patch(outport, patch, sample_rate=44100, audio_device=None, patches_lis
     failed_notes = []
     total_notes = 0
     
-    if 'notes' in patch:
+    if patch.get('type') == 'airbaseSynth':
+        # Airbase Synth patch: send CC values with fixed trigger note
+        print(f"Airbase Synth patch with {len(patch['cc_to_note_mapping'])} notes using CC {patch['control_cc']}")
+        trigger_note = patch['trigger_note']
+        
+        # Iterate through cc_to_note_mapping (CC value -> MIDI note value)
+        for cc_str, midi_note_value in patch['cc_to_note_mapping'].items():
+            cc_value = int(cc_str)
+            
+            # Generate filename using MIDI note value and proper note name (consistent with regular patches)
+            note_name = midi_note_to_name(midi_note_value)
+            safe_note_name = safe_filename(note_name)
+            filename = f"{midi_note_value}_{safe_note_name}"
+            total_notes += 1
+            
+            # Record with CC value and trigger note
+            success = record_and_process_note(outport, trigger_note, patch, patch_folder, sample_rate, 
+                                            audio_device, filename, cc_value=cc_value)
+            if not success:
+                failed_notes.append(midi_note_value)
+                
+    elif 'notes' in patch:
         # Drum patch: play specific notes from the notes dictionary
         print(f"Drum patch with {len(patch['notes'])} specific notes")
         for note_str, drum_name in patch['notes'].items():
@@ -433,57 +478,4 @@ def record_all_patches(patches, midi_port_name, sample_rate=44100, audio_device=
         return False
 
 
-def emergency_audio_reset():
-    """Emergency function to reset audio system if it gets stuck."""
-    try:
-        print("  🚨 Attempting emergency audio reset...")
-        sd.stop()  # Stop all streams
-        time.sleep(1.0)
-        
-        # Additional macOS-specific reset for Core Audio
-        try:
-            # Reset the default device to flush Core Audio state
-            default_device = sd.default.device
-            sd.default.reset()
-            time.sleep(0.5)
-            sd.default.device = default_device
-            print("  🔄 Core Audio state reset")
-        except Exception as reset_error:
-            print(f"  ⚠️  Core Audio reset warning: {reset_error}")
-        
-        time.sleep(1.0)
-        print("  ✅ Audio system reset complete")
-        return True
-    except Exception as e:
-        print(f"  ❌ Audio reset failed: {e}")
-        return False
-
-
  
-    """Diagnose audio device capabilities and current state."""
-    try:
-        device_info = sd.query_devices(device_id)
-        print(f"  🔍 Audio Device Diagnostics:")
-        print(f"    Device: {device_info['name']}")
-        print(f"    Max input channels: {device_info['max_input_channels']}")
-        print(f"    Max output channels: {device_info['max_output_channels']}")
-        print(f"    Default sample rate: {device_info['default_samplerate']}")
-        print(f"    Host API: {sd.query_hostapis(device_info['hostapi'])['name']}")
-        
-        # Check if device supports our recording parameters
-        try:
-            sd.check_input_settings(device=device_id, channels=2, samplerate=44100)
-            print(f"    ✅ Supports stereo @ 44.1kHz")
-        except Exception as e:
-            print(f"    ❌ Stereo @ 44.1kHz not supported: {e}")
-            
-        try:
-            sd.check_input_settings(device=device_id, channels=1, samplerate=44100)
-            print(f"    ✅ Supports mono @ 44.1kHz")
-        except Exception as e:
-            print(f"    ❌ Mono @ 44.1kHz not supported: {e}")
-            
-        return True
-    except Exception as e:
-        print(f"  ❌ Device diagnostics failed: {e}")
-        return False
