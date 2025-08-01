@@ -9,19 +9,13 @@ import numpy as np
 from scipy import signal
 
 
-def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -55.0, min_silence_ms: float = 500.0) -> AudioSegment:
+def remove_silence(audio_segment: AudioSegment, threshold_db: float = -30.0) -> AudioSegment:
     """
-    Remove silence from the beginning and end of audio using adaptive silence detection.
-    
-    Steps:
-    1. Remove last 50ms (recording artifacts)
-    2. Analyze last 500ms to determine silence threshold
-    3. Remove silence from beginning and end based on this threshold
+    Remove silence from the beginning and end of audio using a simple threshold.
     
     Args:
         audio_segment: AudioSegment object
-        silence_threshold_db: Fallback threshold in dB (not used in adaptive mode)
-        min_silence_ms: Minimum silence duration to detect for trimming (milliseconds)
+        threshold_db: Threshold in dB - anything below this is considered silence
     
     Returns:
         Trimmed AudioSegment
@@ -29,28 +23,6 @@ def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -5
     if len(audio_segment) == 0:
         return audio_segment
     
-    # Step 1: Remove last 50ms to eliminate recording artifacts/noises
-    if len(audio_segment) > 50:
-        audio_segment = audio_segment[:-50]
-    
-    if len(audio_segment) == 0:
-        return audio_segment
-    
-    # Step 2: Get the max peak in last 500ms of sample to use as silence threshold
-    tail_analysis_ms = min(500, len(audio_segment))  # Don't exceed sample length
-    tail_segment = audio_segment[-tail_analysis_ms:]
-    
-    # Get the peak level in the tail - this represents our "silence" level
-    tail_peak_db = tail_segment.max_dBFS
-    
-    # If tail is completely silent, use the provided threshold
-    if tail_peak_db == -float('inf'):
-        silence_threshold_db_actual = silence_threshold_db
-    else:
-        # Use the tail peak as our silence threshold (maybe add small margin)
-        silence_threshold_db_actual = tail_peak_db + 3.0  # 3dB margin above tail noise
-    
-    # Step 3: Remove silence from beginning and end using this adaptive threshold
     # Convert to numpy array for analysis
     samples = np.array(audio_segment.get_array_of_samples())
     
@@ -63,13 +35,13 @@ def remove_silence(audio_segment: AudioSegment, silence_threshold_db: float = -5
     
     # Convert threshold from dB to linear amplitude
     max_amplitude = 32767.0 if audio_segment.sample_width == 2 else 2147483647.0
-    threshold_linear = max_amplitude * (10 ** (silence_threshold_db_actual / 20))
+    threshold_linear = max_amplitude * (10 ** (threshold_db / 20))
     
-    # Find non-silent samples
+    # Find samples above threshold (not silence)
     above_threshold = samples_mono > threshold_linear
     
     if not np.any(above_threshold):
-        return audio_segment  # No samples above threshold, return as-is
+        return AudioSegment.empty()  # Return empty segment when all audio is below threshold
     
     # Find first and last non-silent samples
     non_silent_indices = np.where(above_threshold)[0]
@@ -106,47 +78,27 @@ def normalize_peak(audio_segment: AudioSegment, target_peak_db: float = -6.0) ->
     return audio_segment + gain_db
 
 
-def remove_quiet_start(audio_segment: AudioSegment, quiet_threshold_db: float = -5.0) -> AudioSegment:
+def remove_end_artifacts(audio_segment: AudioSegment, trim_end_ms: float = 100.0) -> AudioSegment:
     """
-    Remove quiet parts from the beginning until we reach the threshold level.
+    Remove recording artifacts from the end of audio by trimming the last N milliseconds.
     
     Args:
         audio_segment: AudioSegment object
-        quiet_threshold_db: Minimum dB level for sample start
+        trim_end_ms: Duration to trim from the end in milliseconds
     
     Returns:
-        AudioSegment with quiet start removed
+        AudioSegment with end trimmed
     """
     if len(audio_segment) == 0:
         return audio_segment
     
-    # Convert to numpy array for analysis
-    samples = np.array(audio_segment.get_array_of_samples())
+    # Don't trim if the audio is shorter than the trim duration
+    if len(audio_segment) <= trim_end_ms:
+        return audio_segment
     
-    # Handle stereo by taking max of both channels
-    if audio_segment.channels == 2:
-        samples = samples.reshape((-1, 2))
-        samples_mono = np.max(np.abs(samples), axis=1)
-    else:
-        samples_mono = np.abs(samples)
-    
-    # Convert threshold from dB to linear amplitude
-    max_amplitude = 32767.0 if audio_segment.sample_width == 2 else 2147483647.0
-    threshold_linear = max_amplitude * (10 ** (quiet_threshold_db / 20))
-    
-    # Find first sample above threshold
-    above_threshold = samples_mono > threshold_linear
-    
-    if not np.any(above_threshold):
-        return audio_segment  # No samples above threshold, return as-is
-    
-    # Find first sample above threshold
-    first_loud_sample = np.where(above_threshold)[0][0]
-    
-    # Convert to milliseconds
-    start_ms = int(first_loud_sample * 1000 / audio_segment.frame_rate)
-    
-    return audio_segment[start_ms:]
+    # Trim the end
+    end_time_ms = len(audio_segment) - trim_end_ms
+    return audio_segment[:int(end_time_ms)]
 
 
 def apply_fade(audio_segment: AudioSegment, fade_in_ms: float = 5.0, fade_out_ms: float = 5.0) -> AudioSegment:
@@ -282,31 +234,29 @@ def analyze_patch_consistency(analysis_results: list) -> dict:
 
 
 def process_sample(input_file: str, output_file: str = None,
-                  silence_threshold_db: float = -55.0,
+                  silence_threshold_db: float = -30.0,
                   target_peak_db: float = -1.0,
-                  quiet_start_threshold_db: float = -5.0,
                   fade_in_ms: float = 5.0,
                   fade_out_ms: float = 5.0,
-                  min_silence_ms: float = 500.0) -> bool:
+                  trim_end_ms: float = 100.0) -> bool:
     """
-    Process a single audio sample through the complete chain.
+    Process a single audio sample through the simplified chain.
     
     Processing chain:
-    1. Remove silence from beginning and end (includes 50ms end removal)
-    2. Normalize to target peak level
-    3. Remove quiet parts from beginning (until threshold)
+    1. Remove recording artifacts from the end (last 100ms)
+    2. Remove silence from beginning and end using one threshold
+    3. Normalize to target peak level
     4. Apply fade in/out
     5. Analyze sample quality
     
     Args:
         input_file: Path to input WAV file
         output_file: Path to output WAV file (overwrites input if None)
-        silence_threshold_db: Silence detection threshold
+        silence_threshold_db: Silence detection threshold (clearly audible level)
         target_peak_db: Target peak level for normalization
-        quiet_start_threshold_db: Minimum level for sample start
         fade_in_ms: Fade in duration
         fade_out_ms: Fade out duration
-        min_silence_ms: Minimum silence duration to detect for trimming
+        trim_end_ms: Duration to trim from end to remove recording artifacts
     
     Returns:
         Tuple of (success, analysis_result)
@@ -317,27 +267,46 @@ def process_sample(input_file: str, output_file: str = None,
         
         if len(audio) == 0:
             print(f"  {os.path.basename(input_file)}: Empty file, skipping")
-            return False
+            return False, {
+                "filename": os.path.basename(input_file),
+                "length_ms": 0,
+                "peak_db": -float('inf'),
+                "clipping_pct": 0,
+                "dc_offset_db": -120,
+                "issues": ["Empty file"]
+            }
         
         original_length = len(audio)
         original_bit_depth = audio.sample_width * 8
         
-        # Step 1: Remove silence from beginning and end (includes 50ms end removal)
-        audio = remove_silence(audio, silence_threshold_db, min_silence_ms)
+        # Step 1: Remove recording artifacts from the end (last 100ms)
+        audio = remove_end_artifacts(audio, trim_end_ms)
         if len(audio) == 0:
-            print(f"  {os.path.basename(input_file)}: All silence, skipping")
-            return False
-        length_after_silence = len(audio)
+            print(f"  {os.path.basename(input_file)}: Audio too short after trimming end, skipping")
+            return False, {
+                "filename": os.path.basename(input_file),
+                "length_ms": 0,
+                "peak_db": -float('inf'),
+                "clipping_pct": 0,
+                "dc_offset_db": -120,
+                "issues": ["Audio too short after trimming end"]
+            }
         
-        # Step 2: Normalize to target peak
+        # Step 2: Remove silence from beginning and end
+        audio = remove_silence(audio, silence_threshold_db)
+        if len(audio) == 0:
+            print(f"  {os.path.basename(input_file)}: Sample too quiet (below {silence_threshold_db}dB threshold), skipping")
+            return False, {
+                "filename": os.path.basename(input_file),
+                "length_ms": 0,
+                "peak_db": -float('inf'),
+                "clipping_pct": 0,
+                "dc_offset_db": -120,
+                "issues": ["Sample too quiet - below silence threshold"]
+            }
+        
+        # Step 3: Normalize to target peak
         audio = normalize_peak(audio, target_peak_db)
-        
-        # Step 3: Remove quiet start (after normalization)
-        audio = remove_quiet_start(audio, quiet_start_threshold_db)
-        if len(audio) == 0:
-            print(f"  {os.path.basename(input_file)}: No loud content, skipping")
-            return False
-        length_after_quiet_removal = len(audio)
         
         # Step 4: Apply fades
         audio = apply_fade(audio, fade_in_ms, fade_out_ms)
@@ -355,15 +324,12 @@ def process_sample(input_file: str, output_file: str = None,
         final_peak = audio.max_dBFS
         
         # Calculate silence removed
-        silence_removed_ms = original_length - length_after_silence
-        quiet_start_removed_ms = length_after_silence - length_after_quiet_removal
-        total_removed_ms = silence_removed_ms + quiet_start_removed_ms
-        total_removed_sec = total_removed_ms / 1000.0
+        silence_removed_ms = original_length - final_length
+        silence_removed_sec = silence_removed_ms / 1000.0
         
         bit_depth_info = f" ({original_bit_depth}-bit)" if original_bit_depth != 16 else ""
-        silence_info = f", removed {total_removed_sec:.1f}s silence" if total_removed_ms > 0 else ""
+        silence_info = f", removed {silence_removed_sec:.1f}s silence" if silence_removed_ms > 0 else ""
         issues_info = f" ⚠️ {', '.join(analysis['issues'])}" if analysis['issues'] else ""
-        #print(f"  {filename}: {original_length}ms -> {final_length}ms, peak: {final_peak:.1f}dB{bit_depth_info}{silence_info}{issues_info}")
         
         return True, analysis
         
@@ -381,23 +347,22 @@ def process_sample(input_file: str, output_file: str = None,
 
 
 def process_patch_folder(patch_folder: str,
-                        silence_threshold_db: float = -55.0,
+                        silence_threshold_db: float = -30.0,
                         target_peak_db: float = -6.0,
-                        quiet_start_threshold_db: float = -5.0,
                         fade_in_ms: float = 5.0,
                         fade_out_ms: float = 5.0,
-                        min_silence_ms: float = 500.0) -> tuple[bool, list]:
+                        trim_end_ms: float = 100.0) -> tuple[bool, list]:
     """
     Process all WAV files in a patch folder.
+    If any samples are too quiet, marks the folder as incomplete and omits quiet samples.
     
     Args:
         patch_folder: Path to folder containing WAV files
-        silence_threshold_db: Silence detection threshold
+        silence_threshold_db: Silence detection threshold (clearly audible level)
         target_peak_db: Target peak level for normalization
-        quiet_start_threshold_db: Minimum level for sample start
         fade_in_ms: Fade in duration
         fade_out_ms: Fade out duration
-        min_silence_ms: Minimum silence duration to detect for trimming
+        trim_end_ms: Duration to trim from end to remove recording artifacts
     
     Returns:
         Tuple of (success, list_of_errors)
@@ -428,50 +393,81 @@ def process_patch_folder(patch_folder: str,
     success_count = 0
     errors = []
     analysis_results = []
+    quiet_samples = []
     
     for wav_file in wav_files:
         success, analysis = process_sample(
             input_file=wav_file,
             silence_threshold_db=silence_threshold_db,
             target_peak_db=target_peak_db,
-            quiet_start_threshold_db=quiet_start_threshold_db,
             fade_in_ms=fade_in_ms,
             fade_out_ms=fade_out_ms,
-            min_silence_ms=min_silence_ms
+            trim_end_ms=trim_end_ms
         )
         
-        analysis_results.append(analysis)
-        
-        if success:
-            success_count += 1
+        # Check if sample was too quiet
+        if not success and any("too quiet" in issue.lower() for issue in analysis.get("issues", [])):
+            quiet_samples.append(os.path.basename(wav_file))
+            # Remove the quiet sample from output folder
+            if os.path.exists(wav_file):
+                os.remove(wav_file)
+                print(f"  Removed quiet sample: {os.path.basename(wav_file)}")
         else:
-            errors.append({
-                "filename": os.path.basename(wav_file),
-                "description": "Processing failed"
-            })
+            analysis_results.append(analysis)
+            if success:
+                success_count += 1
+            else:
+                errors.append({
+                    "filename": os.path.basename(wav_file),
+                    "description": "Processing failed"
+                })
     
-    # Analyze patch consistency
-    patch_analysis = analyze_patch_consistency(analysis_results)
+    # If any samples were too quiet, rename folder to indicate incomplete patch
+    if quiet_samples:
+        parent_dir = os.path.dirname(patch_folder)
+        folder_name = os.path.basename(patch_folder)
+        
+        # Add _incomplete_ prefix if not already present
+        if not folder_name.startswith("_incomplete_"):
+            new_folder_name = f"_incomplete_{folder_name}"
+            new_folder_path = os.path.join(parent_dir, new_folder_name)
+            
+            # Rename the folder
+            try:
+                os.rename(patch_folder, new_folder_path)
+                print(f"📁 Renamed folder to: {new_folder_name}")
+                print(f"⚠️  Removed {len(quiet_samples)} quiet samples: {', '.join(quiet_samples)}")
+                patch_folder = new_folder_path  # Update path for analysis
+            except OSError as e:
+                print(f"⚠️  Could not rename folder: {e}")
     
-    # Report patch analysis
-    print(f"\n📊 PATCH ANALYSIS:")
-    print(f"  Expected sample length: {patch_analysis['expected_length_ms']}ms")
+    # Only analyze patch consistency for successfully processed samples
+    if analysis_results:
+        patch_analysis = analyze_patch_consistency(analysis_results)
+        
+        # Report patch analysis
+        print(f"\n📊 PATCH ANALYSIS:")
+        print(f"  Expected sample length: {patch_analysis['expected_length_ms']}ms")
+        
+        if patch_analysis['length_outliers']:
+            print(f"  ⚠️ Length outliers ({len(patch_analysis['length_outliers'])}):")
+            for outlier in patch_analysis['length_outliers'][:5]:  # Show first 5
+                print(f"    {outlier['filename']}: {outlier['length_ms']}ms ({outlier['deviation_pct']:+.0f}%)")
+            if len(patch_analysis['length_outliers']) > 5:
+                print(f"    ... and {len(patch_analysis['length_outliers']) - 5} more")
+        
+        if patch_analysis['quality_issues'] > 0:
+            print(f"  ⚠️ Quality issues found in {patch_analysis['quality_issues']} samples:")
+            for result in analysis_results:
+                if result['issues']:
+                    print(f"    {result['filename']}: {', '.join(result['issues'])}")
+        else:
+            print(f"  ✅ No quality issues detected")
     
-    if patch_analysis['length_outliers']:
-        print(f"  ⚠️ Length outliers ({len(patch_analysis['length_outliers'])}):")
-        for outlier in patch_analysis['length_outliers'][:5]:  # Show first 5
-            print(f"    {outlier['filename']}: {outlier['length_ms']}ms ({outlier['deviation_pct']:+.0f}%)")
-        if len(patch_analysis['length_outliers']) > 5:
-            print(f"    ... and {len(patch_analysis['length_outliers']) - 5} more")
-    
-    if patch_analysis['quality_issues'] > 0:
-        print(f"  ⚠️ Quality issues found in {patch_analysis['quality_issues']} samples:")
-        for result in analysis_results:
-            if result['issues']:
-                print(f"    {result['filename']}: {', '.join(result['issues'])}")
+    total_processed = success_count
+    if quiet_samples:
+        print(f"Processed {total_processed}/{len(wav_files)} samples successfully ({len(quiet_samples)} quiet samples removed)")
     else:
-        print(f"  ✅ No quality issues detected")
-    
-    print(f"Processed {success_count}/{len(wav_files)} samples successfully")
+        print(f"Processed {total_processed}/{len(wav_files)} samples successfully")
     
     return success_count > 0, errors

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Process Audio - Process audio samples in patch folders
-Usage: python utils/process_audio.py [folder_path] [options]
 """
 import sys
 import os
@@ -12,9 +11,10 @@ import shutil
 # Add parent directory to path to import config and modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Import from same directory
 from audio_processor import process_patch_folder
 from config import (SILENCE_THRESHOLD_DB, FADE_IN_MS, FADE_OUT_MS, 
-                   TARGET_PEAK_DB, QUIET_START_THRESHOLD_DB, OUTPUT_DIR, MIN_SILENCE_DURATION_MS)
+                   TARGET_PEAK_DB, OUTPUT_DIR, TRIM_END_MS)
 
 
 def process_single_patch(patch_folder):
@@ -47,13 +47,10 @@ def process_single_patch(patch_folder):
         patch_folder=processed_patch_folder,
         silence_threshold_db=SILENCE_THRESHOLD_DB,
         target_peak_db=TARGET_PEAK_DB,
-        quiet_start_threshold_db=QUIET_START_THRESHOLD_DB,
         fade_in_ms=FADE_IN_MS,
         fade_out_ms=FADE_OUT_MS,
-        min_silence_ms=MIN_SILENCE_DURATION_MS
-    )
-    
-    # Report any processing errors
+        trim_end_ms=TRIM_END_MS
+    )    # Report any processing errors
     if processing_errors:
         print(f"    Warnings: {len(processing_errors)} samples had issues")
         for error in processing_errors:
@@ -95,7 +92,6 @@ Examples:
 
 Configuration is loaded from config.py:
   - Target peak level: {TARGET_PEAK_DB} dB
-  - Quiet start threshold: {QUIET_START_THRESHOLD_DB} dB
   - Fade in/out: {FADE_IN_MS}/{FADE_OUT_MS} ms  
   - Silence threshold: {SILENCE_THRESHOLD_DB} dB
 
@@ -163,7 +159,6 @@ Processed files will be saved to new folders:
     print(f"Base folder: {args.folder}")
     print(f"Patches found: {len(patches_to_process)}")
     print(f"Target peak level: {TARGET_PEAK_DB} dB")
-    print(f"Quiet start threshold: {QUIET_START_THRESHOLD_DB} dB")
     print(f"Fade in: {FADE_IN_MS} ms")
     print(f"Fade out: {FADE_OUT_MS} ms")
     print(f"Silence threshold: {SILENCE_THRESHOLD_DB} dB")
@@ -184,9 +179,8 @@ Processed files will be saved to new folders:
     print(f"  • Step 1: Convert to 16-bit if needed")
     print(f"  • Step 2: Remove silence from beginning/end (threshold: {SILENCE_THRESHOLD_DB} dB)")
     print(f"  • Step 3: Normalize each sample to {TARGET_PEAK_DB} dB peak")
-    print(f"  • Step 4: Remove quiet start until {QUIET_START_THRESHOLD_DB} dB threshold")
-    print(f"  • Step 5: Apply fade in/out ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
-    print(f"  • Step 6: Analyze quality (clipping, DC offset, length consistency)")
+    print(f"  • Step 4: Apply fade in/out ({FADE_IN_MS}/{FADE_OUT_MS} ms)")
+    print(f"  • Step 5: Analyze quality (clipping, DC offset, length consistency)")
     
     # Skip confirmation if --yes flag is used
     if not args.yes:

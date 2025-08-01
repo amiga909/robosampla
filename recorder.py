@@ -7,7 +7,7 @@ import mido
 
 from midi_utils import (
     send_note_on, send_note_off, send_program_change, 
-    send_bank_select, send_control_change, midi_note_to_name
+    send_bank_select, send_airbase_bank_select, send_control_change, midi_note_to_name
 )
 from audio_utils import get_device_channels, save_audio
 from patch_utils import safe_filename, create_patch_folder, save_patches
@@ -271,7 +271,16 @@ def play_patch(outport, patch, sample_rate=44100, audio_device=None, patches_lis
     print(f"Recording audio to folder: {patch_folder}")
     
     # Set up the patch
-    send_bank_select(outport, patch['bank_msb'], patch['bank_lsb'], patch['midi_channel'])
+    if patch.get('type') == 'airbase':
+        # For Airbase: use LSB value directly as bank number (0-7)
+        # The bank_lsb in patch should be the CC32 value (0,1,2,3,4,5,6,7)
+        airbase_bank = patch['bank_lsb']
+        print(f"Airbase bank selection: CC32={airbase_bank}")
+        send_airbase_bank_select(outport, airbase_bank, patch['midi_channel'])
+    else:
+        # Standard MIDI bank selection
+        send_bank_select(outport, patch['bank_msb'], patch['bank_lsb'], patch['midi_channel'])
+    
     send_program_change(outport, patch['program_change'], patch['midi_channel'])
     time.sleep(1)  # Delay for bank/program change to take effect
     
