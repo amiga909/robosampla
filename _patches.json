@@ -280,7 +280,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Jazz Organ 1",
     "program_change": 20,
     "from_note": 36,
@@ -294,7 +294,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Jazz Organ 2",
     "program_change": 21,
     "from_note": 36,
@@ -308,7 +308,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Pipe Organ 1",
     "program_change": 22,
     "from_note": 36,
@@ -322,7 +322,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Pipe Organ 2",
     "program_change": 23,
     "from_note": 36,
@@ -336,7 +336,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Accordion",
     "program_change": 24,
     "from_note": 36,
@@ -350,7 +350,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Female Chorus",
     "program_change": 25,
     "from_note": 36,
@@ -364,7 +364,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Male Chorus",
     "program_change": 26,
     "from_note": 36,
@@ -378,7 +378,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Space Voice 1",
     "program_change": 27,
     "from_note": 36,
@@ -392,7 +392,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Space Voice 2",
     "program_change": 28,
     "from_note": 36,
@@ -406,7 +406,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Wah Voice",
     "program_change": 29,
     "from_note": 36,
@@ -420,7 +420,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Trumpet",
     "program_change": 30,
     "from_note": 36,
@@ -434,7 +434,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Flute",
     "program_change": 31,
     "from_note": 36,
@@ -448,8 +448,8 @@
     "velocity": 127
   },
   {
-    "skip": true,
-    "name": "Whistle ★",
+    "skip": false,
+    "name": "Whistle",
     "program_change": 32,
     "from_note": 36,
     "to_note": 97,
@@ -462,8 +462,8 @@
     "velocity": 127
   },
   {
-    "skip": true,
-    "name": "Violin ★",
+    "skip": false,
+    "name": "Violin",
     "program_change": 33,
     "from_note": 36,
     "to_note": 97,
@@ -476,7 +476,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Cello",
     "program_change": 34,
     "from_note": 36,
@@ -490,7 +490,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Blues Harmonica",
     "program_change": 35,
     "from_note": 36,
@@ -504,7 +504,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Shakuhachi",
     "program_change": 36,
     "from_note": 36,
@@ -518,7 +518,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Koto",
     "program_change": 37,
     "from_note": 36,
@@ -532,7 +532,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Shamisen",
     "program_change": 38,
     "from_note": 36,
@@ -546,7 +546,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Qanun",
     "program_change": 39,
     "from_note": 36,
@@ -560,7 +560,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Synth. Reed",
     "program_change": 40,
     "from_note": 36,
@@ -574,7 +574,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Pearl Drop",
     "program_change": 41,
     "from_note": 36,
@@ -588,7 +588,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Double Reed",
     "program_change": 42,
     "from_note": 36,
@@ -602,7 +602,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Meow Attack",
     "program_change": 43,
     "from_note": 36,
@@ -616,7 +616,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Soft Attack",
     "program_change": 44,
     "from_note": 36,
@@ -630,7 +630,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Fantasy 1",
     "program_change": 45,
     "from_note": 36,
@@ -644,7 +644,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Fantasy 2",
     "program_change": 46,
     "from_note": 36,
@@ -658,7 +658,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Plunk Extend",
     "program_change": 47,
     "from_note": 36,
@@ -672,8 +672,8 @@
     "velocity": 127
   },
   {
-    "skip": true,
-    "name": "Slash Reed ★",
+    "skip": false,
+    "name": "Slash Reed",
     "program_change": 48,
     "from_note": 36,
     "to_note": 97,
@@ -686,7 +686,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Synth. Sitar",
     "program_change": 49,
     "from_note": 36,
@@ -700,7 +700,7 @@
     "velocity": 127
   },
   {
-    "skip": true,
+    "skip": false,
     "name": "Piano 1",
     "program_change": 50,
     "from_note": 36,
