@@ -280,7 +280,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Jazz Organ 1",
     "program_change": 20,
     "from_note": 36,
@@ -294,7 +294,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Jazz Organ 2",
     "program_change": 21,
     "from_note": 36,
@@ -308,7 +308,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Pipe Organ 1",
     "program_change": 22,
     "from_note": 36,
@@ -322,7 +322,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Pipe Organ 2",
     "program_change": 23,
     "from_note": 36,
@@ -336,7 +336,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Accordion",
     "program_change": 24,
     "from_note": 36,
@@ -350,7 +350,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Female Chorus",
     "program_change": 25,
     "from_note": 36,
@@ -364,7 +364,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Male Chorus",
     "program_change": 26,
     "from_note": 36,
@@ -378,7 +378,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Space Voice 1",
     "program_change": 27,
     "from_note": 36,
@@ -392,7 +392,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Space Voice 2",
     "program_change": 28,
     "from_note": 36,
@@ -406,7 +406,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Wah Voice",
     "program_change": 29,
     "from_note": 36,
@@ -420,7 +420,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Trumpet",
     "program_change": 30,
     "from_note": 36,
@@ -434,7 +434,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Flute",
     "program_change": 31,
     "from_note": 36,
@@ -448,7 +448,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Whistle ★",
     "program_change": 32,
     "from_note": 36,
@@ -462,7 +462,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Violin ★",
     "program_change": 33,
     "from_note": 36,
@@ -476,7 +476,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Cello",
     "program_change": 34,
     "from_note": 36,
@@ -490,7 +490,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Blues Harmonica",
     "program_change": 35,
     "from_note": 36,
@@ -504,7 +504,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Shakuhachi",
     "program_change": 36,
     "from_note": 36,
@@ -518,7 +518,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Koto",
     "program_change": 37,
     "from_note": 36,
@@ -532,7 +532,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Shamisen",
     "program_change": 38,
     "from_note": 36,
@@ -546,7 +546,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Qanun",
     "program_change": 39,
     "from_note": 36,
@@ -560,7 +560,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Synth. Reed",
     "program_change": 40,
     "from_note": 36,
@@ -574,7 +574,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Pearl Drop",
     "program_change": 41,
     "from_note": 36,
@@ -588,7 +588,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Double Reed",
     "program_change": 42,
     "from_note": 36,
@@ -602,7 +602,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Meow Attack",
     "program_change": 43,
     "from_note": 36,
@@ -616,7 +616,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Soft Attack",
     "program_change": 44,
     "from_note": 36,
@@ -630,7 +630,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Fantasy 1",
     "program_change": 45,
     "from_note": 36,
@@ -644,7 +644,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Fantasy 2",
     "program_change": 46,
     "from_note": 36,
@@ -658,7 +658,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Plunk Extend",
     "program_change": 47,
     "from_note": 36,
@@ -672,7 +672,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Slash Reed ★",
     "program_change": 48,
     "from_note": 36,
@@ -686,7 +686,7 @@
     "velocity": 127
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "Synth. Sitar",
     "program_change": 49,
     "from_note": 36,
@@ -700,8 +700,8 @@
     "velocity": 127
   },
   {
-    "skip": false,
-    "name": "Banjo ★",
+    "skip": true,
+    "name": "Piano 1",
     "program_change": 50,
     "from_note": 36,
     "to_note": 97,
@@ -715,7 +715,6 @@
   },
   {
     "skip": false,
-    "name": "Mandolin",
     "program_change": 51,
     "from_note": 36,
     "to_note": 97,
@@ -725,39 +724,39 @@
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Piano 2"
   },
   {
     "skip": false,
-    "name": "Blues Guitar",
     "program_change": 52,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 5,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Piano 3"
   },
   {
     "skip": false,
-    "name": "Mute Guitar",
     "program_change": 53,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 7,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Honky-Tonk Piano"
   },
   {
     "skip": false,
-    "name": "Mute Strat",
     "program_change": 54,
     "from_note": 36,
     "to_note": 97,
@@ -767,76 +766,637 @@
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Elec. Piano"
   },
   {
     "skip": false,
-    "name": "Overdrive GT",
     "program_change": 55,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 6,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Harpsichord 1"
   },
   {
     "skip": false,
-    "name": "Feedback GT",
     "program_change": 56,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 6,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Harpsichord 2"
   },
   {
     "skip": false,
-    "name": "Distortion GT",
     "program_change": 57,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 6,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Synth. Clavi."
   },
   {
     "skip": false,
-    "name": "Power GT",
     "program_change": 58,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 6,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Metal Honky-Tonk"
   },
   {
     "skip": false,
-    "name": "Jet GT",
     "program_change": 59,
     "from_note": 36,
     "to_note": 97,
     "note_gap": 3,
-    "note_duration": 6,
+    "note_duration": 20,
     "mono": true,
     "midi_channel": 0,
     "bank_msb": 0,
     "bank_lsb": 0,
-    "velocity": 127
+    "velocity": 127,
+    "name": "Double Attack"
+  },
+  {
+    "skip": false,
+    "program_change": 60,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Bells"
+  },
+  {
+    "skip": false,
+    "program_change": 61,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Carillon"
+  },
+  {
+    "skip": false,
+    "program_change": 62,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Celesta"
+  },
+  {
+    "skip": false,
+    "program_change": 63,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Vib.1"
+  },
+  {
+    "skip": false,
+    "program_change": 64,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Vib.2"
+  },
+  {
+    "skip": false,
+    "program_change": 65,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Vib.3 \u2605"
+  },
+  {
+    "skip": false,
+    "program_change": 66,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Bell-Lyra"
+  },
+  {
+    "skip": false,
+    "program_change": 67,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Xylophone"
+  },
+  {
+    "skip": false,
+    "program_change": 68,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Soft Xylophone"
+  },
+  {
+    "skip": false,
+    "program_change": 69,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Marimba"
+  },
+  {
+    "skip": false,
+    "program_change": 70,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Aco. Guitar 1"
+  },
+  {
+    "skip": false,
+    "program_change": 71,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Aco. Guitar 2"
+  },
+  {
+    "skip": false,
+    "program_change": 72,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Semiaco Guitar"
+  },
+  {
+    "skip": false,
+    "program_change": 73,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Feedback"
+  },
+  {
+    "skip": false,
+    "program_change": 74,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Elec. Guitar 1"
+  },
+  {
+    "skip": false,
+    "program_change": 75,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Elec. Guitar 2"
+  },
+  {
+    "skip": false,
+    "program_change": 76,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Elec. Bass 1"
+  },
+  {
+    "skip": false,
+    "program_change": 77,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Elec. Bass 2"
+  },
+  {
+    "skip": false,
+    "program_change": 78,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Slap Bass"
+  },
+  {
+    "skip": false,
+    "program_change": 79,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Metallic Bass"
+  },
+  {
+    "skip": false,
+    "program_change": 80,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Drums 1"
+  },
+  {
+    "skip": false,
+    "program_change": 81,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Drums 2"
+  },
+  {
+    "skip": false,
+    "program_change": 82,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Drums 3"
+  },
+  {
+    "skip": false,
+    "program_change": 83,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Synth. Clapper"
+  },
+  {
+    "skip": false,
+    "program_change": 84,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Tambourine"
+  },
+  {
+    "skip": false,
+    "program_change": 85,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Cowbell"
+  },
+  {
+    "skip": false,
+    "program_change": 86,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Conga"
+  },
+  {
+    "skip": false,
+    "program_change": 87,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Tabla"
+  },
+  {
+    "skip": false,
+    "program_change": 88,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Afro-Percussion"
+  },
+  {
+    "skip": false,
+    "program_change": 89,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Steel Drum"
+  },
+  {
+    "skip": false,
+    "program_change": 90,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Motorcycle"
+  },
+  {
+    "skip": false,
+    "program_change": 91,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Jet Roar"
+  },
+  {
+    "skip": false,
+    "program_change": 92,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Explosion"
+  },
+  {
+    "skip": false,
+    "program_change": 93,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Typhoon Sound"
+  },
+  {
+    "skip": false,
+    "program_change": 94,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Cavernous Sound"
+  },
+  {
+    "skip": false,
+    "program_change": 95,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Scratch Sound"
+  },
+  {
+    "skip": false,
+    "program_change": 96,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Computer Sound"
+  },
+  {
+    "skip": false,
+    "program_change": 97,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Laser Gun"
+  },
+  {
+    "skip": false,
+    "program_change": 98,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Miracle"
+  },
+  {
+    "skip": false,
+    "program_change": 99,
+    "from_note": 36,
+    "to_note": 97,
+    "note_gap": 3,
+    "note_duration": 20,
+    "mono": true,
+    "midi_channel": 0,
+    "bank_msb": 0,
+    "bank_lsb": 0,
+    "velocity": 127,
+    "name": "Sweep"
   }
 ]
