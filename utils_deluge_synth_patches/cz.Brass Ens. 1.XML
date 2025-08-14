@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sound
+	firmwareVersion="c1.2.1"
+	earliestCompatibleFirmware="4.1.0-alpha"
+	polyphonic="poly"
+	voicePriority="1"
+	mode="subtractive"
+	modFXType="none"
+	lpfMode="12dB"
+	hpfMode="HPLadder"
+	filterRoute="H2L"
+	maxVoices="8">
+	<osc1
+		type="sample"
+		loopMode="0"
+		reversed="0"
+		timeStretchEnable="0"
+		timeStretchAmount="0">
+		<sampleRanges>
+			<sampleRange
+				rangeTopNote="36"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/36_C2.wav"
+				transpose="24">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441361" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="37"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/37_Csharp2.wav"
+				transpose="23">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441295" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="38"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/38_D2.wav"
+				transpose="22">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441582" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="39"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/39_Dsharp2.wav"
+				transpose="21">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441361" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="40"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/40_E2.wav"
+				transpose="20">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441339" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="41"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/41_F2.wav"
+				transpose="19">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442155" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="42"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/42_Fsharp2.wav"
+				transpose="18">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441361" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="43"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/43_G2.wav"
+				transpose="17">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441361" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="44"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/44_Gsharp2.wav"
+				transpose="16">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441471" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="45"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/45_A2.wav"
+				transpose="15">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442067" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="46"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/46_Asharp2.wav"
+				transpose="14">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441383" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="47"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/47_B2.wav"
+				transpose="13">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441317" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="48"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/48_C3.wav"
+				transpose="12">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441427" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="49"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/49_Csharp3.wav"
+				transpose="11">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442552" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="50"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/50_D3.wav"
+				transpose="10">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441471" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="51"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/51_Dsharp3.wav"
+				transpose="9">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441383" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="52"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/52_E3.wav"
+				transpose="8">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442375" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="53"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/53_F3.wav"
+				transpose="7">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441383" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="54"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/54_Fsharp3.wav"
+				transpose="6">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442067" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="55"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/55_G3.wav"
+				transpose="5">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442508" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="56"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/56_Gsharp3.wav"
+				transpose="4">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441560" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="57"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/57_A3.wav"
+				transpose="3">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442883" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="58"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/58_Asharp3.wav"
+				transpose="2">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441405" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="59"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/59_B3.wav"
+				transpose="1">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442640" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="60"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/60_C4.wav">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441427" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="61"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/61_Csharp4.wav"
+				transpose="-1">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442706" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="62"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/62_D4.wav"
+				transpose="-2">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441449" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="63"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/63_Dsharp4.wav"
+				transpose="-3">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441560" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="64"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/64_E4.wav"
+				transpose="-4">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442684" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="65"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/65_F4.wav"
+				transpose="-5">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441912" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="66"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/66_Fsharp4.wav"
+				transpose="-6">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441493" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="67"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/67_G4.wav"
+				transpose="-7">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442177" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="68"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/68_Gsharp4.wav"
+				transpose="-8">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442971" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="69"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/69_A4.wav"
+				transpose="-9">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442971" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="70"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/70_Asharp4.wav"
+				transpose="-10">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442089" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="71"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/71_B4.wav"
+				transpose="-11">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442221" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="72"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/72_C5.wav"
+				transpose="-12">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442596" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="73"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/73_Csharp5.wav"
+				transpose="-13">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441648" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="74"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/74_D5.wav"
+				transpose="-14">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441604" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="75"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/75_Dsharp5.wav"
+				transpose="-15">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441383" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="76"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/76_E5.wav"
+				transpose="-16">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442794" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="77"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/77_F5.wav"
+				transpose="-17">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441493" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="78"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/78_Fsharp5.wav"
+				transpose="-18">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442508" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="79"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/79_G5.wav"
+				transpose="-19">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441560" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="80"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/80_Gsharp5.wav"
+				transpose="-20">
+				<zone
+					startSamplePos="0"
+					endSamplePos="443147" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="81"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/81_A5.wav"
+				transpose="-21">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442949" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="82"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/82_Asharp5.wav"
+				transpose="-22">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442508" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="83"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/83_B5.wav"
+				transpose="-23">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442552" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="84"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/84_C6.wav"
+				transpose="-24">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441361" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="85"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/85_Csharp6.wav"
+				transpose="-25">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441516" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="86"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/86_D6.wav"
+				transpose="-26">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441670" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="87"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/87_Dsharp6.wav"
+				transpose="-27">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441251" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="88"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/88_E6.wav"
+				transpose="-28">
+				<zone
+					startSamplePos="0"
+					endSamplePos="443037" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="89"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/89_F6.wav"
+				transpose="-29">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442728" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="90"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/90_Fsharp6.wav"
+				transpose="-30">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442243" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="91"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/91_G6.wav"
+				transpose="-31">
+				<zone
+					startSamplePos="0"
+					endSamplePos="443037" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="92"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/92_Gsharp6.wav"
+				transpose="-32">
+				<zone
+					startSamplePos="0"
+					endSamplePos="443081" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="93"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/93_A6.wav"
+				transpose="-33">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442309" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="94"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/94_Asharp6.wav"
+				transpose="-34">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442486" />
+			</sampleRange>
+			<sampleRange
+				rangeTopNote="95"
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/95_B6.wav"
+				transpose="-35">
+				<zone
+					startSamplePos="0"
+					endSamplePos="442353" />
+			</sampleRange>
+			<sampleRange
+				fileName="SAMPLES/CasioCZ230S/Brass Ens. 1/96_C7.wav"
+				transpose="-36">
+				<zone
+					startSamplePos="0"
+					endSamplePos="441582" />
+			</sampleRange>
+		</sampleRanges>
+	</osc1>
+	<osc2
+		type="square"
+		transpose="0"
+		cents="0"
+		retrigPhase="-1" />
+	<lfo1 type="triangle" syncLevel="0" syncType="0" />
+	<lfo2 type="triangle" syncLevel="0" syncType="0" />
+	<unison num="1" detune="1" spread="0" />
+	<defaultParams
+		arpeggiatorGate="0x00000000"
+		portamento="0x80000000"
+		compressorShape="0xDC28F5B2"
+		oscAVolume="0x7FFFFFFF"
+		oscAPulseWidth="0x00000000"
+		oscAWavetablePosition="0x00000000"
+		oscBVolume="0x80000000"
+		oscBPulseWidth="0x00000000"
+		oscBWavetablePosition="0x00000000"
+		noiseVolume="0x80000000"
+		volume="0xFE000000"
+		pan="0x00000000"
+		lpfFrequency="0x7FFFFFD2"
+		lpfResonance="0x80000000"
+		hpfFrequency="0x80000000"
+		hpfResonance="0x80000000"
+		lfo1Rate="0x26000000"
+		lfo2Rate="0x00000000"
+		modulator1Amount="0x80000000"
+		modulator1Feedback="0x80000000"
+		modulator2Amount="0x80000000"
+		modulator2Feedback="0x80000000"
+		carrier1Feedback="0x80000000"
+		carrier2Feedback="0x80000000"
+		modFXRate="0xC7AE146E"
+		modFXDepth="0xAE147AD9"
+		delayRate="0xF0000000"
+		delayFeedback="0x80000000"
+		reverbAmount="0x80000000"
+		arpeggiatorRate="0x00000000"
+		stutterRate="0x00000000"
+		sampleRateReduction="0x80000000"
+		bitCrush="0x80000000"
+		modFXOffset="0x00000000"
+		modFXFeedback="0x1EB851CF"
+		compressorThreshold="0x00000000"
+		lpfMorph="0x80000000"
+		hpfMorph="0x80000000"
+		waveFold="0x80000000"
+		ratchetProbability="0x80000000"
+		ratchetAmount="0x80000000"
+		sequenceLength="0x80000000"
+		rhythm="0x80000000">
+		<envelope1
+			attack="0x80000000"
+			decay="0xE6666654"
+			sustain="0x7FFFFFFF"
+			release="0x80000000" />
+		<envelope2
+			attack="0xE6666654"
+			decay="0xE6666654"
+			sustain="0xFFFFFFE9"
+			release="0xCC000000" />
+		<patchCables>
+			<patchCable
+				source="velocity"
+				destination="volume"
+				amount="0x3FFFFFE8" />
+			<patchCable
+				source="aftertouch"
+				destination="volume"
+				amount="0x2A3D7094" />
+			<patchCable
+				source="y"
+				destination="lpfFrequency"
+				amount="0x19999990" />
+		</patchCables>
+		<equalizer
+			bass="0x00000000"
+			treble="0x00000000"
+			bassFrequency="0x00000000"
+			trebleFrequency="0x00000000" />
+	</defaultParams>
+	<arpeggiator
+		mode="off"
+		numOctaves="2"
+		syncLevel="7"
+		syncType="0"
+		arpMode="off"
+		noteMode="up"
+		octaveMode="up"
+		mpeVelocity="off" />
+	<modKnobs>
+		<modKnob controlsParam="pan" />
+		<modKnob controlsParam="volumePostFX" />
+		<modKnob controlsParam="lpfResonance" />
+		<modKnob controlsParam="lpfFrequency" />
+		<modKnob controlsParam="env1Release" />
+		<modKnob controlsParam="env1Attack" />
+		<modKnob controlsParam="delayFeedback" />
+		<modKnob controlsParam="delayRate" />
+		<modKnob controlsParam="reverbAmount" />
+		<modKnob controlsParam="volumePostReverbSend" patchAmountFromSource="compressor" />
+		<modKnob controlsParam="pitch" patchAmountFromSource="lfo1" />
+		<modKnob controlsParam="lfo1Rate" />
+		<modKnob controlsParam="portamento" />
+		<modKnob controlsParam="stutterRate" />
+		<modKnob controlsParam="bitcrushAmount" />
+		<modKnob controlsParam="sampleRateReduction" />
+	</modKnobs>
+	<delay
+		pingPong="1"
+		analog="0"
+		syncLevel="7"
+		syncType="0" />
+	<sidechain
+		attack="327244"
+		release="936"
+		syncLevel="6"
+		syncType="0" />
+	<audioCompressor
+		attack="83886080"
+		release="83886080"
+		thresh="0"
+		ratio="1073741824"
+		compHPF="0"
+		compBlend="2147483647" />
+</sound>

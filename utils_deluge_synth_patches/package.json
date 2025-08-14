@@ -1,0 +1,14 @@
+{
+  "name": "DelugeXMLCreator",
+  "version": "1.0.0",
+  "description": "DelugeXMLCreator application",
+  "main": "index.js",
+  "productName": "DelugeXMLCreator application",
+  "dependencies": {
+    "wavefile": "^11.0.0",
+    "x2js": "^3.2.1"
+  },
+  "scripts": {
+    "generate-xml": "node index.js"
+  }
+}

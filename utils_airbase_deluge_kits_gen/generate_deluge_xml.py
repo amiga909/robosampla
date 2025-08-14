@@ -23,8 +23,7 @@ def get_drum_samples():
         "7_Clap",
         "8_Rim_Shot",
         "9_Crash",
-        "10_Ride",
-        "11_PedalHiHat"
+        "10_Ride"
     ]
 
 
@@ -86,7 +85,7 @@ def generate_xml_for_patch(template_path, patch_name, patch_dir, output_dir, dry
             if wav_info:
                 existing_samples[sample_base] = sample_file
                 sample_info[sample_base] = wav_info
-                print(f"  ✓ Found: {sample_file} ({wav_info['frames']} samples, {wav_info['duration']:.3f}s)")
+                #print(f"  ✓ Found: {sample_file} ({wav_info['frames']} samples, {wav_info['duration']:.3f}s)")
             else:
                 print(f"  ⚠️  Found but can't read: {sample_file}")
         else:
@@ -168,10 +167,15 @@ def generate_xml_for_patch(template_path, patch_name, patch_dir, output_dir, dry
 
 def main():
     """Main function to process all patches."""
-    script_dir = Path(__file__).parent
-    template_file = script_dir / "KIT001.XML"  # Template is in same folder as script
-    processed_dir = script_dir.parent / "_output" / "_processed"
-    output_dir = script_dir.parent / "_XML"
+    # Current directory where this script file is located
+    current_dir = Path(__file__).parent
+    
+    # Parent directory (one level up from current script)
+    parent_dir = Path(__file__).parent.parent
+
+    template_file = current_dir / "KIT001.XML"   
+    processed_dir = parent_dir / "_output_Jomox" / "_processed"
+    output_dir = current_dir / "_XML"  # Fixed: was incorrectly using Path(__file__)
     
     # Check if template exists
     if not template_file.exists():
@@ -216,6 +220,7 @@ def main():
     # Process each patch
     generated_count = 0
     skipped_count = 0
+    skipped_patches = []
     
     for patch_dir in sorted(patch_dirs):
         patch_name = patch_dir.name
@@ -234,16 +239,20 @@ def main():
                 generated_count += 1
             else:
                 skipped_count += 1
+                skipped_patches.append(patch_name)
                 
         except Exception as e:
             print(f"  ❌ Error processing {patch_name}: {e}")
             skipped_count += 1
+            skipped_patches.append(patch_name)
         
         print()
     
     print(f"✅ Complete!")
     print(f"   Generated: {generated_count} XML files")
     print(f"   Skipped: {skipped_count} patches")
+    if skipped_patches:
+        print(f"   Skipped patches: {', '.join(skipped_patches)}")
     print(f"   Output directory: {output_dir}")
 
 

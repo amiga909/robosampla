@@ -15,7 +15,7 @@ An automated tool for sampling synthesizers by playing MIDI notes and recording 
 - `python utils/setup.py` used in other scripts to setup local_config.json
 
 - `python utils_audio_processor/process_audio`  
-  => currently moved to REAPER batch processor!
+  Note: VST Plugin processing available but done with REAPER batch processor
 
 ## File Structure
 
